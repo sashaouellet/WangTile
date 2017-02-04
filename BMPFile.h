@@ -24,12 +24,14 @@ private:
 	const char* m_fileName;
 	unsigned char* m_pixelData;
 	int m_width;
-	int m_height;
+    int m_height;
 public:
 	BMPFile(const char*);
+    unsigned char* getPixels();
 	void printPixelData();
 	vector<unsigned int> getPixel(int, int);
-	static void writeFile(int, int, unsigned char*);
+	static void writeFile(int, int, unsigned char*, const char*);
+    void flipY();
 };
 
 #endif //WANGTILE_BMPFILE_H

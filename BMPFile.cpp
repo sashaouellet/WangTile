@@ -39,6 +39,7 @@ BMPFile::BMPFile(const char* fileName)
 	fread(data, sizeof(unsigned char), size, f); // read the rest of the data at once
 	fclose(f);
 
+	// Flipping R and B values since they are stored backwards in BMPs
 	for (int i = 0; i < size; i += 3)
 	{
 		unsigned char tmp = data[i];
@@ -46,10 +47,23 @@ BMPFile::BMPFile(const char* fileName)
 		data[i + 2] = tmp;
 	}
 
+	flipY();
+
 	m_fileName = fileName;
 	m_pixelData = data;
 	m_width = width;
 	m_height = height;
+
+	delete [] data;
+}
+
+/**
+ * Gets the pixel data array for this BMP
+ * @return The pixel data array of the BMP
+ */
+unsigned char* BMPFile::getPixels()
+{
+	return m_pixelData;
 }
 
 /**
@@ -107,8 +121,9 @@ vector<unsigned int> BMPFile::getPixel(int x, int y)
  * @param height The height of the image
  * @param pixelData The pixel array of R, G, B values. Assumes that the R and B values have not been switched, and that
  *        the array is still stored bottom-up
+ * @param name The name of the file to save to (should include .bmp, i.e. "image.bmp")
  */
-void writeFile(int width, int height, unsigned char* pixelData)
+void BMPFile::writeFile(int width, int height, unsigned char* pixelData, const char* name)
 {
 	int fileSize = 54 + 3 * width * height;
 
@@ -116,17 +131,17 @@ void writeFile(int width, int height, unsigned char* pixelData)
 	unsigned char bmpinfoheader[40] = { 40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0 };
 	unsigned char bmppad[3] = { 0,0,0 };
 
-	bmpfileheader[2] = (unsigned char)(fileSize);
-	bmpfileheader[3] = (unsigned char)(fileSize >> 8);
-	bmpfileheader[4] = (unsigned char)(fileSize >> 16);
-	bmpfileheader[5] = (unsigned char)(fileSize >> 24);
+	bmpfileheader[2]  = (unsigned char)(fileSize);
+	bmpfileheader[3]  = (unsigned char)(fileSize >> 8);
+	bmpfileheader[4]  = (unsigned char)(fileSize >> 16);
+	bmpfileheader[5]  = (unsigned char)(fileSize >> 24);
 
-	bmpinfoheader[4] = (unsigned char)(width);
-	bmpinfoheader[5] = (unsigned char)(width >> 8);
-	bmpinfoheader[6] = (unsigned char)(width >> 16);
-	bmpinfoheader[7] = (unsigned char)(width >> 24);
-	bmpinfoheader[8] = (unsigned char)(height);
-	bmpinfoheader[9] = (unsigned char)(height >> 8);
+	bmpinfoheader[4]  = (unsigned char)(width);
+	bmpinfoheader[5]  = (unsigned char)(width >> 8);
+	bmpinfoheader[6]  = (unsigned char)(width >> 16);
+	bmpinfoheader[7]  = (unsigned char)(width >> 24);
+	bmpinfoheader[8]  = (unsigned char)(height);
+	bmpinfoheader[9]  = (unsigned char)(height >> 8);
 	bmpinfoheader[10] = (unsigned char)(height >> 16);
 	bmpinfoheader[11] = (unsigned char)(height >> 24);
 
@@ -140,7 +155,7 @@ void writeFile(int width, int height, unsigned char* pixelData)
 	}
 
 	FILE *f;
-	f = fopen("test3.bmp", "wb");
+	f = fopen(name, "wb");
 	fwrite(bmpfileheader, 1, 14, f);
 	fwrite(bmpinfoheader, 1, 40, f);
 	for (int i = 0; i < height; i++)
@@ -149,4 +164,28 @@ void writeFile(int width, int height, unsigned char* pixelData)
 		fwrite(bmppad, 1, (4 - (width * 3) % 4) % 4, f);
 	}
 	fclose(f);
+}
+
+/**
+ * Flips the data in the pixel array so that the data can be read top-down instead of bottom-up
+ */
+void BMPFile::flipY()
+{
+	const int rowSize = m_width * 3;
+	unsigned char* flipped = new unsigned char[rowSize * m_height];
+
+	for (int i = 0; i < m_height; i++)
+	{
+		for (int j = 0 ; j < m_width ; j++)
+		{
+			cout << "i: " << i << ", j: " << j << endl;
+			flipped[3 * (i * m_width + j) + 0] = m_pixelData[3 * (i * m_width + j) + 0];
+			flipped[3 * (i * m_width + j) + 1] = m_pixelData[3 * (i * m_width + j) + 1];
+			flipped[3 * (i * m_width + j) + 2] = m_pixelData[3 * (i * m_width + j) + 2];
+		}
+	}
+
+	m_pixelData = flipped;
+
+	delete [] flipped;
 }
