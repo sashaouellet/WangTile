@@ -31,7 +31,8 @@ public:
 	void printPixelData();
 	vector<unsigned int> getPixel(int, int);
 	static void writeFile(int, int, unsigned char*, const char*);
-    void flipY();
+
+    virtual ~BMPFile();
 };
 
 #endif //WANGTILE_BMPFILE_H
