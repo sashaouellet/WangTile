@@ -21,13 +21,14 @@ using namespace std;
 class BMPFile
 {
 private:
-	const char* m_fileName;
-	unsigned char* m_pixelData;
+    const char* m_fileName;
+    unsigned char* m_pixelData;
 	int m_width;
     int m_height;
 public:
 	BMPFile(const char*);
     unsigned char* getPixels();
+    const char* getFileName();
 	void printPixelData();
 	vector<unsigned int> getPixel(int, int);
 	static void writeFile(int, int, unsigned char*, const char*);

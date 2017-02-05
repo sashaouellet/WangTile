@@ -10,6 +10,7 @@
 
 #include <cstring>
 #include "BMPFile.h"
+#include "util.h"
 
 /**
  * Constructor for the BMPFile, given a specific file name to read. Will populate the pixelData array with the
@@ -49,6 +50,8 @@ BMPFile::BMPFile(const char* fileName)
 	}
 
 	m_fileName = fileName;
+
+    util::parseFileNameForSideCodes(string(m_fileName), '_');
 }
 
 BMPFile::~BMPFile()
@@ -166,4 +169,9 @@ void BMPFile::writeFile(int width, int height, unsigned char* pixelData, const c
 		fwrite(bmppad, 1, (4 - (width * 3) % 4) % 4, f);
 	}
 	fclose(f);
+}
+
+const char*BMPFile::getFileName()
+{
+    return m_fileName;
 }
