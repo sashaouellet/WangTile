@@ -18,9 +18,15 @@ private:
     vector<char> m_sideCodes;
 
 public:
+    static const int NORTH = 0;
+    static const int EAST = 1;
+    static const int SOUTH = 2;
+    static const int WEST = 3;
+
     Tile(BMPFile*);
     char getCodeAtSide(int);
     bool hasCodeAtSide(char, int);
+    void print();
 };
 
 

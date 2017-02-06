@@ -1,18 +1,35 @@
 #include <iostream>
 #include "BMPFile.h"
+#include "Tile.h"
+#include "TileMap.h"
 
 using namespace std;
 
 int main() {
-    BMPFile bmp("tile_GBGC.bmp");
+    BMPFile* tile1 = new BMPFile("tile_GBGC.bmp");
+    BMPFile* tile2 = new BMPFile("tile_GCYC.bmp");
+    BMPFile* tile3 = new BMPFile("tile_GRGB.bmp");
+    BMPFile* tile4 = new BMPFile("tile_KBGR.bmp");
+    BMPFile* tile5 = new BMPFile("tile_YCKC.bmp");
+    BMPFile* tile6 = new BMPFile("tile_YRGC.bmp");
+    BMPFile* tile7 = new BMPFile("tile_YRGR.bmp");
+    BMPFile* tile8 = new BMPFile("tile_YRYC.bmp");
 
-//    bmp.printPixelData();
+    vector<Tile> tileSet;
 
-//	vector<unsigned int> pixel = bmp.getPixel(0, 0);
+    tileSet.push_back(Tile(tile1));
+    tileSet.push_back(Tile(tile2));
+    tileSet.push_back(Tile(tile3));
+    tileSet.push_back(Tile(tile4));
+    tileSet.push_back(Tile(tile5));
+    tileSet.push_back(Tile(tile6));
+    tileSet.push_back(Tile(tile7));
+    tileSet.push_back(Tile(tile8));
 
-//    cout << pixel[0] << ", " << pixel[1] << ", " << pixel[2];
+    TileMap map(tileSet, 5, 2);
 
-//	BMPFile::writeFile(300, 288, bmp.getPixels(), "test2.bmp");
+    map.generate();
+    map.print();
 
     return 0;
 }

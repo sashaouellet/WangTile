@@ -30,10 +30,10 @@ BMPFile::BMPFile(const char* fileName)
 	m_width = *(int*)&info[18];
 	m_height = *(int*)&info[22];
 
-	cout << endl;
-	cout << "Name:   \t" << fileName << endl;
-	cout << "Width:  \t" << m_width << endl;
-	cout << "Height: \t" << m_height << endl;
+//	cout << endl;
+//	cout << "Name:   \t" << fileName << endl;
+//	cout << "Width:  \t" << m_width << endl;
+//	cout << "Height: \t" << m_height << endl;
 
 	int size = 3 * m_width * m_height;
 	m_pixelData = new unsigned char[size]; // allocate 3 bytes per pixel
@@ -51,7 +51,7 @@ BMPFile::BMPFile(const char* fileName)
 
 	m_fileName = fileName;
 
-    util::parseFileNameForSideCodes(string(m_fileName), '_');
+    cout << "Loaded " << fileName << endl;
 }
 
 BMPFile::~BMPFile()
@@ -64,6 +64,7 @@ BMPFile::~BMPFile()
 
 /**
  * Gets the pixel data array for this BMP
+ *
  * @return The pixel data array of the BMP
  */
 unsigned char* BMPFile::getPixels()
@@ -89,9 +90,11 @@ void BMPFile::printPixelData()
 
 /**
  * Gets the pixel data at the given x, y value
+ *
  * @param x The x value of the pixel wanted
  * @param y The y value of the pixel wanted
  * @return A length 3 vector containing the R, G, B values of the desired pixel at x, y
+ * @throws invalid_argument if the given x or y values exceeds the width or height of the image
  */
 vector<unsigned int> BMPFile::getPixel(int x, int y)
 {
@@ -122,6 +125,7 @@ vector<unsigned int> BMPFile::getPixel(int x, int y)
 /**
  * Writes the given pixel data array as a BMP, with the width and height provided used to determine the file size, and
  * for header information
+ *
  * @param width The width of the image
  * @param height The height of the image
  * @param pixelData The pixel array of R, G, B values. Assumes that the R and B values have not been switched, and that
