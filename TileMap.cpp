@@ -138,8 +138,11 @@ unsigned char* TileMap::makeArray()
     int size = 3 * (pixelWidth * m_width) * (pixelHeight * m_height);
     unsigned char* data = new unsigned char[size];
 
-    for (int i = 0 ; i < size ; i++)
+    for (int i = 0 ; i < size ; i += 3)
     {
-
+        Tile t = m_tiles[i / (pixelWidth * 3 * m_width * pixelHeight)][i / (pixelWidth * 3) % (pixelWidth * 3)];
+        data[i + 0] = t.getImage()->getPixels()[i / (pixelWidth * 3) + (i % (pixelWidth * 3)];
     }
+
+	return data;
 }
