@@ -56,3 +56,8 @@ void Tile::print()
 {
     cout << m_sideCodes[0] << m_sideCodes[1] << m_sideCodes[2] << m_sideCodes[3];
 }
+
+BMPFile* Tile::getImage()
+{
+    return m_image;
+}

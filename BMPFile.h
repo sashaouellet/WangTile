@@ -32,6 +32,8 @@ public:
 	void printPixelData();
 	vector<unsigned int> getPixel(int, int);
 	static void writeFile(int, int, unsigned char*, const char*);
+    int getWidth();
+    int getHeight();
 
     virtual ~BMPFile();
 };

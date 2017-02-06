@@ -90,7 +90,7 @@ void TileMap::generate()
                         t = getRandom();
                         cout << "[NORTH / SOUTH] Need: " << m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH) << ", Have: " << t.getCodeAtSide(Tile::NORTH) << endl;
                         cout << "[EAST / WEST]   Need: " << row[j - 1].getCodeAtSide(Tile::EAST) << ", Have: " << t.getCodeAtSide(Tile::WEST) << endl;
-//                        tries++;
+                        tries++;
                     }
                 }
 
@@ -128,5 +128,18 @@ void TileMap::print()
             m_tiles[i][j].print();
             cout << endl;
         }
+    }
+}
+
+unsigned char* TileMap::makeArray()
+{
+    int pixelWidth = m_tiles[0][0].getImage()->getWidth();
+    int pixelHeight = m_tiles[0][0].getImage()->getHeight();
+    int size = 3 * (pixelWidth * m_width) * (pixelHeight * m_height);
+    unsigned char* data = new unsigned char[size];
+
+    for (int i = 0 ; i < size ; i++)
+    {
+
     }
 }

@@ -179,3 +179,13 @@ const char*BMPFile::getFileName()
 {
     return m_fileName;
 }
+
+int BMPFile::getWidth()
+{
+    return m_width;
+}
+
+int BMPFile::getHeight()
+{
+    return m_height;
+}

@@ -28,6 +28,7 @@ public:
     void generate();
     Tile getRandom();
     void print();
+    unsigned char* makeArray();
 };
 
 #endif //WANGTILE_TILEMAP_H

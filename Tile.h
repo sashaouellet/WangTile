@@ -27,6 +27,7 @@ public:
     char getCodeAtSide(int);
     bool hasCodeAtSide(char, int);
     void print();
+    BMPFile* getImage();
 };
 
 
