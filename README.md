@@ -1,2 +1,6 @@
-# WangTile
-Texture generator based on the notion of Wang Tiles
+# Wang Tile Texture Generator
+## Intro
+
+This project serves as an independent study project for an Advanced Programming for Visual Effects course (C++) at the Savannah College of Art and Design (SCAD).
+
+
