@@ -23,16 +23,37 @@ TileMap::TileMap(vector<Tile> tileSet, unsigned int width, unsigned int height)
     m_tileSet = tileSet;
     m_width = width;
     m_height = height;
-
-    m_tiles.resize(height);
-
     m_generator = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
     m_distribution = std::uniform_int_distribution<int>(0, m_tileSet.size() - 1);
 }
 
 /**
+ * Get the pixel width of the entire TileMap
+ * @return The pixel width of the map
+ */
+int TileMap::getPixelWidth()
+{
+    return m_tileSet[0].getImage()->getWidth() * m_width;
+}
+
+/**
+ * Get the pixel height of the entire TileMap
+ * @return The pixel height of the map
+ */
+int TileMap::getPixelHeight()
+{
+    return m_tileSet[0].getImage()->getHeight() * m_height;
+}
+
+/**
  * Runs through the generation process of the entire tile map, populating the vectors for each row of the grid
  * according to the specifications for Wang Tile tiling process
+ *
+ * Specifications: Begin with any first tile. Next, select a tile to be placed to the right. This tile's West side must
+ * have a matching code to the East side of the tile to its left. Repeat for the remainder of the first row.
+ *
+ * The next row must follow the same specifications, in addition to the North side codes matching the South side codes
+ * of their neighbor directly above.
  */
 void TileMap::generate()
 {
@@ -40,7 +61,7 @@ void TileMap::generate()
     for (int i = 0 ; i < m_height ; i++)
     {
         cout << "i: " << i << endl;
-        vector<Tile> row = m_tiles[i];
+        vector<Tile> row;
 
         for (int j = 0 ; j < m_width ; j++)
         {
@@ -90,14 +111,15 @@ void TileMap::generate()
                         t = getRandom();
                         cout << "[NORTH / SOUTH] Need: " << m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH) << ", Have: " << t.getCodeAtSide(Tile::NORTH) << endl;
                         cout << "[EAST / WEST]   Need: " << row[j - 1].getCodeAtSide(Tile::EAST) << ", Have: " << t.getCodeAtSide(Tile::WEST) << endl;
-                        tries++;
+//                        tries++; // Fail safe to avoid endless cycle if location not tile-able
                     }
                 }
 
                 row.push_back(t);
             }
         }
-        m_tiles[i] = row;
+
+        m_tiles.push_back(row);
     }
 }
 
@@ -107,10 +129,7 @@ void TileMap::generate()
  */
 Tile TileMap::getRandom()
 {
-    int r = m_distribution(m_generator);
-
-//    return m_tileSet[rand() % m_tileSet.size()];
-    return m_tileSet[r];
+    return m_tileSet[m_distribution(m_generator)];
 }
 
 /**
@@ -120,7 +139,7 @@ void TileMap::print()
 {
     for (int i = 0 ; i < m_height ; i++)
     {
-        cout << "ROW " << i << endl << "-----------------" << endl;
+        cout << "ROW " << i << ", size: " << m_tiles[i].size() << endl << "-----------------" << endl;
 
         for (int j = 0 ; j < m_width ; j++)
         {
@@ -131,18 +150,51 @@ void TileMap::print()
     }
 }
 
+/**
+ * Aggregates all the tiles in the 2-dimensional vector structure to put all the Tile pixel data into the main
+ * pixel data array that will be written as the output file.
+ *
+ * @return The final output pixel data array of all the tile's pixel data combined
+ */
 unsigned char* TileMap::makeArray()
 {
-    int pixelWidth = m_tiles[0][0].getImage()->getWidth();
-    int pixelHeight = m_tiles[0][0].getImage()->getHeight();
-    int size = 3 * (pixelWidth * m_width) * (pixelHeight * m_height);
-    unsigned char* data = new unsigned char[size];
+    int size = 3 * getPixelWidth() * getPixelHeight();
+    unsigned char *data = new unsigned char[size];
 
-    for (int i = 0 ; i < size ; i += 3)
+    for (int i = 0 ; i < m_height ; i++)
     {
-        Tile t = m_tiles[i / (pixelWidth * 3 * m_width * pixelHeight)][i / (pixelWidth * 3) % (pixelWidth * 3)];
-        data[i + 0] = t.getImage()->getPixels()[i / (pixelWidth * 3) + (i % (pixelWidth * 3)];
+        for (int j = 0 ; j < m_width ; j++)
+        {
+            placeTile(m_tiles[i][j], j, i, data);
+        }
     }
 
 	return data;
+}
+
+/**
+ * Given a specific tile and its location in the 2-dimensional vector, populates the given main data array with the
+ * Tile's pixel data. The function determines the initial "offset" where writing of the data will begin, and from there
+ * the Tile's location in x-space determines how far after the offset the pixel data starts.
+ *
+ * @param tile The tile to populate the main data array with
+ * @param x The x location of the tile in the 2-dimensional vector
+ * @param y The y location of the tile in the 2-dimensional vector
+ * @param data The main data pixel array of all the tiles
+ */
+void TileMap::placeTile(Tile &tile, int x, int y, unsigned char *data)
+{
+    y = m_height - 1 - y;
+    BMPFile *image = tile.getImage();
+    unsigned char *imagePixels = image->getPixels();
+    int tileWidth = image->getWidth();
+    int size = tileWidth * image->getHeight() * 3;
+    int offset = y * m_width * size;
+
+    for (int i = 0; i < size; i++)
+    {
+        int row = i / (tileWidth * 3);
+        int col = i % (tileWidth * 3);
+        data[offset + (tileWidth * 3 * (x + (m_width * row))) + col] = imagePixels[i];
+    }
 }

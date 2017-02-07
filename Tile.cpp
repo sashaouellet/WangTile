@@ -50,13 +50,17 @@ bool Tile::hasCodeAtSide(char code, int index)
 }
 
 /**
- * Prints the tile information: namely its code sequence
+ * Prints the Tile information: namely its code sequence
  */
 void Tile::print()
 {
     cout << m_sideCodes[0] << m_sideCodes[1] << m_sideCodes[2] << m_sideCodes[3];
 }
 
+/**
+ * Get the image this Tile is associated with
+ * @return The tile image
+ */
 BMPFile* Tile::getImage()
 {
     return m_image;

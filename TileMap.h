@@ -29,6 +29,9 @@ public:
     Tile getRandom();
     void print();
     unsigned char* makeArray();
+    void placeTile(Tile&, int, int, unsigned char*);
+    int getPixelWidth();
+    int getPixelHeight();
 };
 
 #endif //WANGTILE_TILEMAP_H

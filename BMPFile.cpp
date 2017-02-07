@@ -10,7 +10,6 @@
 
 #include <cstring>
 #include "BMPFile.h"
-#include "util.h"
 
 /**
  * Constructor for the BMPFile, given a specific file name to read. Will populate the pixelData array with the
@@ -29,12 +28,6 @@ BMPFile::BMPFile(const char* fileName)
 	// extract image height and width from header
 	m_width = *(int*)&info[18];
 	m_height = *(int*)&info[22];
-
-//	cout << endl;
-//	cout << "Name:   \t" << fileName << endl;
-//	cout << "Width:  \t" << m_width << endl;
-//	cout << "Height: \t" << m_height << endl;
-
 	int size = 3 * m_width * m_height;
 	m_pixelData = new unsigned char[size]; // allocate 3 bytes per pixel
 
@@ -50,8 +43,6 @@ BMPFile::BMPFile(const char* fileName)
 	}
 
 	m_fileName = fileName;
-
-    cout << "Loaded " << fileName << endl;
 }
 
 BMPFile::~BMPFile()
@@ -175,16 +166,28 @@ void BMPFile::writeFile(int width, int height, unsigned char* pixelData, const c
 	fclose(f);
 }
 
+/**
+ * Get the file name of this bitmap
+ * @return The file name
+ */
 const char*BMPFile::getFileName()
 {
     return m_fileName;
 }
 
+/**
+ * Gets the width of this bitmap (pixels)
+ * @return The pixel width
+ */
 int BMPFile::getWidth()
 {
     return m_width;
 }
 
+/**
+ * Gets the height of this bitmap (pixels)
+ * @return The pixel height
+ */
 int BMPFile::getHeight()
 {
     return m_height;
