@@ -15,6 +15,6 @@ Below is a tile set of size 16 that can aperiodically tile an infinite plane. Ea
  
  As you can see, adjacent edges have the same color, which in this case is a visual representation of the edge codes.
  
- ## To do
+## To do
  
  Actual synthesis of a texture must now be implemented. The goal is to allow input of a single "source" texture bitmap that can then be broken apart and reconstructed into an appropriate Wang Tile set  (multiple tiles, 16+) that can aperiodically tile a plane of arbitrary size.
