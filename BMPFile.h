@@ -34,6 +34,7 @@ public:
 	static void writeFile(int, int, unsigned char*, const char*);
     int getWidth();
     int getHeight();
+    unsigned char* getPixelRegion(unsigned int, unsigned int, unsigned int, unsigned int);
 
     virtual ~BMPFile();
 };

@@ -166,6 +166,30 @@ void BMPFile::writeFile(int width, int height, unsigned char* pixelData, const c
 	fclose(f);
 }
 
+unsigned char* BMPFile::getPixelRegion(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
+{
+    int width = x2 - x1 + 1;
+    int height = y2 - y1 + 1;
+    int size = 3 * width * height;
+    unsigned char *data = new unsigned char[size];
+    int dataIndex = 0; // Index in output array
+
+    for (int i = y1 ; i <= y2 ; i++)
+    {
+        int y = m_height - 1 - i; // Flip because BMP stored bottom-up
+        y *= 3;
+        for (int j = x1 ; j <= x2 ; j++)
+        {
+            int x = j * 3;
+            data[dataIndex++] = m_pixelData[y * m_width + x];
+            data[dataIndex++] = m_pixelData[y * m_width + x + 1];
+            data[dataIndex++] = m_pixelData[y * m_width + x + 2];
+        }
+    }
+
+    return data;
+}
+
 /**
  * Get the file name of this bitmap
  * @return The file name
