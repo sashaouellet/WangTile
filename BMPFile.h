@@ -4,7 +4,7 @@
  *
  * Reading of byte data routine taken from: http://stackoverflow.com/questions/9296059/read-pixel-value-in-bmp-file
  *
- * @author Sasha Ouellet
+ * @author Sasha Ouellet - spaouellet@me.com - www.sashaouellet.com
  * @version 1.0 - 01-25-17
  */
 
@@ -34,6 +34,7 @@ public:
 	static void writeFile(int, int, unsigned char*, const char*);
     int getWidth();
     int getHeight();
+    unsigned char* getPixelRegion(unsigned int, unsigned int, unsigned int, unsigned int);
 
     virtual ~BMPFile();
 };

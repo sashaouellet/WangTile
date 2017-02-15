@@ -1,11 +1,51 @@
 #include <iostream>
+#include <sstream>
 #include "BMPFile.h"
 #include "Tile.h"
 #include "TileMap.h"
+#include "Quilt.h"
 
 using namespace std;
 
+void test1();
+void test2();
+void test3();
+
 int main() {
+
+//    test3();
+
+    return 0;
+}
+
+// Quilt patch extraction test
+void test3()
+{
+    Quilt quilt(new BMPFile("flowerpatch.bmp"), 400, 41);
+
+    //quilt.extractPatches();
+
+    vector<Patch*> patches = quilt.getPatches();
+
+    for (int i = 0 ; i < patches.size() ; i++)
+    {
+        std::ostringstream n;
+        n << "patch" << i << ".bmp";
+        BMPFile::writeFile(41, 41, patches[i]->getPixelData(), n.str().c_str());
+    }
+}
+
+// Region extraction and output test
+void test2()
+{
+    BMPFile* test = new BMPFile("flowerpatch.bmp");
+
+    BMPFile::writeFile(41, 41, test->getPixelRegion(0, 0, 40, 40), "region.bmp");
+}
+
+// Tiling algorithm test
+void test1()
+{
     BMPFile* tile1 = new BMPFile("tile_GBGB.bmp");
     BMPFile* tile2 = new BMPFile("tile_GBGY.bmp");
     BMPFile* tile3 = new BMPFile("tile_GBRB.bmp");
@@ -48,6 +88,4 @@ int main() {
     map.print();
 
     BMPFile::writeFile(map.getPixelWidth(), map.getPixelHeight(), map.makeArray(), "output.bmp");
-
-    return 0;
 }

@@ -1,6 +1,9 @@
 /**
  * The Tile class represents the Wang Tile construct, holding information about its associated bitmap "texture," and the
  * color codes of the N, E, S, W sides of the tile face.
+ *
+ * @author Sasha Ouellet - spaouellet@me.com - www.sashaouellet.com
+ * @version 1.0 - 02/05/17
  */
 
 #include "Tile.h"
