@@ -3,7 +3,7 @@
  * input image and then randomly selected, overlapped with each other, and an error surface calculated, upon which
  * a least-cost boundary cut on both edges of the patch in order to fit them together "seamlessly"
  *
- * @author Sasha Ouellet - spaouellet@me.com
+ * @author Sasha Ouellet - spaouellet@me.com - www.sashaouellet.com
  * @version 1.0 - 02/13/17
  */
 
@@ -13,6 +13,7 @@
 #include "BMPFile.h"
 #include "Patch.h"
 #include <vector>
+#include <random>
 
 using namespace std;
 
@@ -23,16 +24,18 @@ private:
     unsigned int m_dimension;
     unsigned int m_patchSize;
     vector<Patch*> m_patches;
-
-    const int OVERLAP_DIVISOR = 6;
+    default_random_engine m_generator;
 
     void extractPatches();
 
 public:
+    const static int OVERLAP_DIVISOR = 6;
+    const static double BEST_FIT_MARGIN = 1.1;
+
     Quilt(BMPFile *, unsigned int, unsigned int);
     vector<vector<Patch*>> generate();
     vector<Patch*> getPatches();
-    void addPatch(Patch*, Patch*, vector<Patch*>);
+    void addPatch(Patch*, Patch*, vector<Patch*>&);
 };
 
 #endif //WANGTILE_QUILT_H

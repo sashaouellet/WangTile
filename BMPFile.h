@@ -4,7 +4,7 @@
  *
  * Reading of byte data routine taken from: http://stackoverflow.com/questions/9296059/read-pixel-value-in-bmp-file
  *
- * @author Sasha Ouellet
+ * @author Sasha Ouellet - spaouellet@me.com - www.sashaouellet.com
  * @version 1.0 - 01-25-17
  */
 

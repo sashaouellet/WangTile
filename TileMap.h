@@ -3,7 +3,7 @@
  *
  * Tiles are stored in a vector of vectors, to represent the grid layout of the Tiles.
  *
- * @author Sasha Ouellet - spaouellet@me.com
+ * @author Sasha Ouellet - spaouellet@me.com - www.sashaouellet.com
  * @version 1.0 - 02/05/17
  */
 
