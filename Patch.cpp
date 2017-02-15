@@ -72,6 +72,7 @@ unsigned int Patch::getOverlapScore(Patch *left, Patch *top)
             }
         }
     }
+    return overlap;
 }
 
 /**

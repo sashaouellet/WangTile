@@ -58,7 +58,20 @@ void Quilt::extractPatches()
 vector<vector<Patch*>> Quilt::generate()
 {
     vector<vector<Patch*>> patches;
+	unsigned int patchesPerSide = m_dimension / m_patchSize;
 
+	for (int i = 0; i < patchesPerSide; i++)
+	{
+		vector<Patch*> row;
+
+		for (int j = 0; j < patchesPerSide; j++)
+		{
+			Patch *left = j != 0 ? row[j - 1] : nullptr;
+			Patch *above = i != 0 ? patches[i - 1][j] : nullptr;
+
+			addPatch(left, above, row);
+		}
+	}
 
 }
 
@@ -73,11 +86,18 @@ vector<vector<Patch*>> Quilt::generate()
  */
 void Quilt::addPatch(Patch *left, Patch *above, vector<Patch*> &row)
 {
-    vector<Patch*> patches;
-    vector<Patch*>::iterator it;
+	// First patch in whole quilt, just pick a random one
+	if (left == nullptr && above == nullptr)
+	{
+		row.push_back(getRandom(m_patches));
+		return;
+	}
 
-    unsigned int bestError = UINT_MAX;
+	vector<Patch*> patches;
+	vector<Patch*>::iterator it;
+	unsigned int bestError = UINT_MAX;
 
+	// Loop through once to calculate overlap region errors
     for (it = m_patches.begin() ; it < m_patches.end() ; it++)
     {
         Patch *patch = new Patch((*it)->getPixelData(), (*it)->getDimension());
@@ -87,6 +107,7 @@ void Quilt::addPatch(Patch *left, Patch *above, vector<Patch*> &row)
         patches.push_back(patch);
     }
 
+	// Loop again to trim patches that fall outside of acceptable margin of error
     for (it = patches.begin() ; it < patches.end() ; it++)
     {
         // Not within X% of least error
@@ -97,9 +118,18 @@ void Quilt::addPatch(Patch *left, Patch *above, vector<Patch*> &row)
         }
     }
 
-    uniform_int_distribution<int> dist(0, m_patches.size() - 1);
+    row.push_back(getRandom(patches));
+}
 
-    row.push_back(patches[dist(m_generator)]);
+/**
+ * Gets a random patch from the given patch list
+ * @return The randomly selected patch
+ */
+Patch* Quilt::getRandom(vector<Patch*> &patches)
+{
+	uniform_int_distribution<int> dist(0, patches.size() - 1);
+
+	return patches[dist(m_generator)];
 }
 
 /**

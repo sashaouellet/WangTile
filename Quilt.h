@@ -30,12 +30,13 @@ private:
 
 public:
     const static int OVERLAP_DIVISOR = 6;
-    const static double BEST_FIT_MARGIN = 1.1;
+    constexpr static double BEST_FIT_MARGIN = 1.1;
 
     Quilt(BMPFile *, unsigned int, unsigned int);
     vector<vector<Patch*>> generate();
     vector<Patch*> getPatches();
     void addPatch(Patch*, Patch*, vector<Patch*>&);
+	Patch* getRandom(vector<Patch*>&);
 };
 
 #endif //WANGTILE_QUILT_H

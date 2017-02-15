@@ -15,6 +15,10 @@ int main() {
 
 //    test3();
 
+	BMPFile f("test.bmp");
+
+	BMPFile::writeFile(256, 256, f.getPixels(), "testOut.bmp");
+
     return 0;
 }
 
@@ -23,16 +27,7 @@ void test3()
 {
     Quilt quilt(new BMPFile("flowerpatch.bmp"), 400, 41);
 
-    //quilt.extractPatches();
-
-    vector<Patch*> patches = quilt.getPatches();
-
-    for (int i = 0 ; i < patches.size() ; i++)
-    {
-        std::ostringstream n;
-        n << "patch" << i << ".bmp";
-        BMPFile::writeFile(41, 41, patches[i]->getPixelData(), n.str().c_str());
-    }
+    quilt.generate();
 }
 
 // Region extraction and output test
