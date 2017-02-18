@@ -4,6 +4,7 @@
  *
  * @author Sasha Ouellet - spaouellet@me.com
  * @version 1.0 - 02/05/17
+ * @version 1.1 - 02/18/17 - New constructor to specify in advance the side codes rather than deriving from filename
  */
 
 #ifndef WANGTILE_TILE_H
@@ -27,6 +28,7 @@ public:
     static const int WEST = 3;
 
     Tile(BMPFile*);
+	Tile(BMPFile*, vector<char>);
     char getCodeAtSide(int);
     bool hasCodeAtSide(char, int);
     void print();

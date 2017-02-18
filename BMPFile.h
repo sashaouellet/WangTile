@@ -6,6 +6,7 @@
  *
  * @author Sasha Ouellet - spaouellet@me.com - www.sashaouellet.com
  * @version 1.0 - 01-25-17
+ * @version 1.1 - 02-18-17 - Construct from pixel data array rather than solely a file
  */
 
 #ifndef WANGTILE_BMPFILE_H
@@ -27,6 +28,7 @@ private:
     int m_height;
 public:
 	BMPFile(const char*);
+	BMPFile(unsigned char*, int, int);
     unsigned char* getPixels();
     const char* getFileName();
 	void printPixelData();

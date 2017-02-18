@@ -25,6 +25,7 @@ private:
 
 public:
     TileMap(vector<Tile>, unsigned int, unsigned int);
+	TileMap(vector<vector<Tile>>);
     void generate();
     Tile getRandom();
     void print();

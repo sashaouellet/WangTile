@@ -45,12 +45,25 @@ BMPFile::BMPFile(const char* fileName)
 	m_fileName = fileName;
 }
 
+/**
+ * Constructs the BMPFile from a given pixel data array that was derived from somewhere else, and not necessarily a
+ * file, unlike the original constructor
+ *
+ * @param pixelData The data array that represents the RGB values of this bitmap file
+ * @param width The side length (in pixels) of the width of the bitmap
+ * @param height The side length (in pixels) of the height of the bitmap
+ */
+BMPFile::BMPFile(unsigned char *pixelData, int width, int height)
+{
+	m_fileName = NULL;
+	m_pixelData = pixelData;
+	m_width = width;
+	m_height = height;
+}
+
 BMPFile::~BMPFile()
 {
-	if (m_pixelData)
-	{
-		delete[] m_pixelData;
-	}
+	delete[] m_pixelData;
 }
 
 /**
@@ -166,6 +179,15 @@ void BMPFile::writeFile(int width, int height, unsigned char* pixelData, const c
 	fclose(f);
 }
 
+/**
+ * Gets the specified pixel region of this bitmap file within the 2 corners provided
+ * @param x1 The top left corner x-value
+ * @param y1 The top left corner y-value
+ * @param x2 The bottom right corner x-value
+ * @param y2 The bottom right corner y-value
+ * @return The pixel region specified by the points. This ends up being a subset array of the pixel data from the original
+ * 		   pixel data array
+ */
 unsigned char* BMPFile::getPixelRegion(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
 {
     int width = x2 - x1 + 1;

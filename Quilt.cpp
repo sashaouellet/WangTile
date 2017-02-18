@@ -74,6 +74,8 @@ vector<vector<Patch*>> Quilt::generate()
 
         patches.push_back(row);
 	}
+
+	return patches;
 }
 
 /**
@@ -112,9 +114,7 @@ Patch* Quilt::getPatch(Patch *left, Patch *above)
         // Not within X% of least error
         if ((*it)->getTotalError() > bestError * Quilt::BEST_FIT_MARGIN)
         {
-            Patch* temp = *it;
             it = patches.erase(it);
-//            delete temp;
         }
         else
         {
@@ -122,7 +122,7 @@ Patch* Quilt::getPatch(Patch *left, Patch *above)
         }
     }
 
-    return getRandom(patches, true);
+    return getRandom(patches, false);
 }
 
 /**

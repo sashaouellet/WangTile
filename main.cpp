@@ -21,10 +21,20 @@ int main() {
 // Quilt patch extraction test
 void test3()
 {
-    BMPFile *file = new BMPFile("flowerpatch.bmp");
-    Quilt *quilt = new Quilt(file, 400, 41);
+    BMPFile *file = new BMPFile("test.bmp");
+    Quilt *quilt = new Quilt(file, 640, 128);
 
-    quilt->generate();
+    vector<vector<Patch*>> patches = quilt->generate();
+
+	for (int i = 0 ; i < patches.size() ; i++)
+	{
+		for (int j = 0 ; j < patches[i].size() ; j++)
+		{
+			stringstream s;
+			s << i << "-" << j << ".bmp";
+			BMPFile::writeFile(128, 128, patches[i][j]->getPixelData(), s.str().c_str());
+		}
+	}
 }
 
 // Region extraction and output test

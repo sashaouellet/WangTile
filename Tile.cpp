@@ -4,6 +4,7 @@
  *
  * @author Sasha Ouellet - spaouellet@me.com - www.sashaouellet.com
  * @version 1.0 - 02/05/17
+ * @version 1.1 - 02/18/17 - New constructor to specify in advance the side codes rather than deriving from filename
  */
 
 #include "Tile.h"
@@ -11,11 +12,26 @@
 
 /**
  * Default constructor for the Tile object, given the bitmap file to make this tile from
+ *
+ * @param The bitmap file representing this Tile's pixel content
  */
 Tile::Tile(BMPFile* file)
 {
     m_image = file;
     m_sideCodes = util::parseFileNameForSideCodes(string(file->getFileName()), '_');
+}
+
+/**
+ * Constructs the Tile with the specified bitmap file and the side codes vector representing the "codes" for each of the
+ * sides so that the Tile may be tiled properly
+ *
+ * @param file The bitmap file
+ * @param codes The vector representing each side's code
+ */
+Tile::Tile(BMPFile *file, vector<char> codes)
+{
+	m_image = file;
+	m_sideCodes = codes;
 }
 
 /**

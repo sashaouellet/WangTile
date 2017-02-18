@@ -24,11 +24,7 @@ Patch::Patch(unsigned char *data, unsigned int dimension)
 
 Patch::~Patch()
 {
-    if (m_error)
-    {
-        delete [] m_error;
-    }
-    delete [] m_pixelData;
+
 }
 
 /**
