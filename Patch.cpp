@@ -19,13 +19,16 @@ Patch::Patch(unsigned char *data, unsigned int dimension)
 {
     m_pixelData = data;
     m_dimension = dimension;
-    m_error = new unsigned int[m_dimension * m_dimension];
     m_totalError = 0;
 }
 
 Patch::~Patch()
 {
-    delete[] m_error;
+    if (m_error)
+    {
+        delete [] m_error;
+    }
+    delete [] m_pixelData;
 }
 
 /**
@@ -52,6 +55,8 @@ unsigned char* Patch::getPixelData()
 unsigned int Patch::getOverlapScore(Patch *left, Patch *top)
 {
     int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
+    m_error = new unsigned int[m_dimension * m_dimension];
+
     for (int i = 0 ; i < m_dimension ; i++)
     {
         for (int j = 0 ; j < m_dimension ; j++)
@@ -72,7 +77,7 @@ unsigned int Patch::getOverlapScore(Patch *left, Patch *top)
             }
         }
     }
-    return overlap;
+    return m_totalError;
 }
 
 /**

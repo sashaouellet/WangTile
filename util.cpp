@@ -58,6 +58,9 @@ namespace util
             sum += (a - b) * (a - b);
         }
 
+        delete [] a;
+        delete [] b;
+
         return sqrt(sum);
     }
 }

@@ -13,11 +13,7 @@ void test3();
 
 int main() {
 
-//    test3();
-
-	BMPFile f("test.bmp");
-
-	BMPFile::writeFile(256, 256, f.getPixels(), "testOut.bmp");
+    test3();
 
     return 0;
 }
@@ -25,9 +21,10 @@ int main() {
 // Quilt patch extraction test
 void test3()
 {
-    Quilt quilt(new BMPFile("flowerpatch.bmp"), 400, 41);
+    BMPFile *file = new BMPFile("flowerpatch.bmp");
+    Quilt *quilt = new Quilt(file, 400, 41);
 
-    quilt.generate();
+    quilt->generate();
 }
 
 // Region extraction and output test

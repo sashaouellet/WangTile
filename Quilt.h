@@ -35,8 +35,8 @@ public:
     Quilt(BMPFile *, unsigned int, unsigned int);
     vector<vector<Patch*>> generate();
     vector<Patch*> getPatches();
-    void addPatch(Patch*, Patch*, vector<Patch*>&);
-	Patch* getRandom(vector<Patch*>&);
+    Patch* getPatch(Patch*, Patch*);
+	Patch* getRandom(vector<Patch*>&, bool);
 };
 
 #endif //WANGTILE_QUILT_H

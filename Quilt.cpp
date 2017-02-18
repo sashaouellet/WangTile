@@ -69,28 +69,27 @@ vector<vector<Patch*>> Quilt::generate()
 			Patch *left = j != 0 ? row[j - 1] : nullptr;
 			Patch *above = i != 0 ? patches[i - 1][j] : nullptr;
 
-			addPatch(left, above, row);
+			row.push_back(getPatch(left, above));
 		}
-	}
 
+        patches.push_back(row);
+	}
 }
 
 /**
- * Adds a new random Patch to the given row of the quilt. This determines a random patch from a subset of the entire
+ * Returns the next patch. This determines a random patch from a subset of the entire
  * patch set that satisfies the minimum overlap error. Then makes a least-cost cut along the boundary of the top/left
  * edges of the patch.
  *
  * @param left The patch to the left of the patch to be placed, nullptr if the patch to be placed is the first in the row
  * @param above The patch above the patch to be placed, nullptr if this is the first row of patches
- * @param row The patch vector row to add this Patch to
  */
-void Quilt::addPatch(Patch *left, Patch *above, vector<Patch*> &row)
+Patch* Quilt::getPatch(Patch *left, Patch *above)
 {
 	// First patch in whole quilt, just pick a random one
 	if (left == nullptr && above == nullptr)
 	{
-		row.push_back(getRandom(m_patches));
-		return;
+		return getRandom(m_patches, false);
 	}
 
 	vector<Patch*> patches;
@@ -108,28 +107,47 @@ void Quilt::addPatch(Patch *left, Patch *above, vector<Patch*> &row)
     }
 
 	// Loop again to trim patches that fall outside of acceptable margin of error
-    for (it = patches.begin() ; it < patches.end() ; it++)
+    for (it = patches.begin(); it != patches.end();)
     {
         // Not within X% of least error
         if ((*it)->getTotalError() > bestError * Quilt::BEST_FIT_MARGIN)
         {
-            patches.erase(it);
-            delete it;
+            Patch* temp = *it;
+            it = patches.erase(it);
+//            delete temp;
+        }
+        else
+        {
+            it++;
         }
     }
 
-    row.push_back(getRandom(patches));
+    return getRandom(patches, true);
 }
 
 /**
  * Gets a random patch from the given patch list
+ *
+ * @param del Boolean determining if the non-selected patch pointers should be deleted
  * @return The randomly selected patch
  */
-Patch* Quilt::getRandom(vector<Patch*> &patches)
+Patch* Quilt::getRandom(vector<Patch*> &patches, bool del)
 {
 	uniform_int_distribution<int> dist(0, patches.size() - 1);
+    int ind = dist(m_generator);
 
-	return patches[dist(m_generator)];
+    if (del)
+    {
+        for (int i = 0; i < patches.size(); i++)
+        {
+            if (i != ind)
+            {
+                delete patches[i];
+            }
+        }
+    }
+
+	return patches[ind];
 }
 
 /**
