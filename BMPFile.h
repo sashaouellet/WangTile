@@ -29,7 +29,7 @@ private:
 public:
 	BMPFile(const char*);
 	BMPFile(unsigned char*, int, int);
-    unsigned char* getPixels();
+    const unsigned char* getPixels();
     const char* getFileName();
 	void printPixelData();
 	vector<unsigned int> getPixel(int, int);
@@ -38,7 +38,7 @@ public:
     int getHeight();
     unsigned char* getPixelRegion(unsigned int, unsigned int, unsigned int, unsigned int);
 
-    virtual ~BMPFile();
+	virtual ~BMPFile();
 };
 
 #endif //WANGTILE_BMPFILE_H

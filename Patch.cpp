@@ -15,16 +15,18 @@
  *             of the original input image
  * @param dimension The length of the Patch edges
  */
-Patch::Patch(unsigned char *data, unsigned int dimension)
+Patch::Patch(const unsigned char* data, unsigned int dimension)
 {
     m_pixelData = data;
     m_dimension = dimension;
     m_totalError = 0;
 }
 
-Patch::~Patch()
+Patch::Patch(const Patch &patch)
 {
-
+    m_pixelData = patch.m_pixelData;
+    m_dimension = patch.m_dimension;
+    m_totalError = 0;
 }
 
 /**

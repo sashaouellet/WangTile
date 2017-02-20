@@ -21,19 +21,31 @@
  *                  increases efficiency of quilting, but the output will be repetitive. Too small a patch size may
  *                  result in a loss of key details from the source image.
  */
-Quilt::Quilt(BMPFile *source, unsigned int dimension, unsigned int patchSize)
-{
-    if (source->getWidth() % patchSize != 0)
+Quilt::Quilt(BMPFile& source, unsigned int dimension, unsigned int patchSize)
+ : m_source(source) {
+    if (source.getWidth() % patchSize != 0)
     {
         throw invalid_argument("Patch size must be whole divisor of input source image");
     }
 
-    m_source = source;
     m_dimension = dimension;
     m_patchSize = patchSize;
     m_generator = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
 
     extractPatches();
+}
+
+Quilt::~Quilt()
+{
+    vector<Patch*>::iterator it;
+    for (it = m_patches.begin() ; it < m_patches.end(); it++)
+    {
+        delete *it;
+    }
+
+    vector<vector<Patch*>>::iterator it2;
+
+//    for (it2 = )
 }
 
 /**
@@ -42,7 +54,7 @@ Quilt::Quilt(BMPFile *source, unsigned int dimension, unsigned int patchSize)
  */
 void Quilt::extractPatches()
 {
-    int patchesPerSide = m_source->getWidth() / m_patchSize;
+    int patchesPerSide = m_source.getWidth() / m_patchSize;
 
     for (int i = 0 ; i < patchesPerSide ; i++)
     {
@@ -50,12 +62,12 @@ void Quilt::extractPatches()
         for (int j = 0 ; j < patchesPerSide ; j++)
         {
             int colLower = j * m_patchSize;
-            m_patches.push_back(new Patch(m_source->getPixelRegion(colLower, rowLower, colLower + m_patchSize - 1, rowLower + m_patchSize - 1), m_patchSize));
+            m_patches.push_back(new Patch(m_source.getPixelRegion(colLower, rowLower, colLower + m_patchSize - 1, rowLower + m_patchSize - 1), m_patchSize));
         }
     }
 }
 
-vector<vector<Patch*>> Quilt::generate()
+vector<vector<Patch*>> Quilt::generate() // TODO make this void and keep track of vector inside here
 {
     vector<vector<Patch*>> patches;
 	unsigned int patchesPerSide = m_dimension / m_patchSize;
@@ -78,6 +90,11 @@ vector<vector<Patch*>> Quilt::generate()
 	return patches;
 }
 
+unsigned char* Quilt::makeSeamsAndQuilt()
+{
+
+}
+
 /**
  * Returns the next patch. This determines a random patch from a subset of the entire
  * patch set that satisfies the minimum overlap error. Then makes a least-cost cut along the boundary of the top/left
@@ -91,7 +108,8 @@ Patch* Quilt::getPatch(Patch *left, Patch *above)
 	// First patch in whole quilt, just pick a random one
 	if (left == nullptr && above == nullptr)
 	{
-		return getRandom(m_patches, false);
+        Patch* p = getRandom(m_patches, false);
+		return new Patch(*p);
 	}
 
 	vector<Patch*> patches;
@@ -101,7 +119,7 @@ Patch* Quilt::getPatch(Patch *left, Patch *above)
 	// Loop through once to calculate overlap region errors
     for (it = m_patches.begin() ; it < m_patches.end() ; it++)
     {
-        Patch *patch = new Patch((*it)->getPixelData(), (*it)->getDimension());
+        Patch *patch = new Patch(**it);
         unsigned int error = patch->getOverlapScore(left, above);
         bestError = error < bestError ? error : bestError;
 
@@ -114,6 +132,7 @@ Patch* Quilt::getPatch(Patch *left, Patch *above)
         // Not within X% of least error
         if ((*it)->getTotalError() > bestError * Quilt::BEST_FIT_MARGIN)
         {
+            delete *it;
             it = patches.erase(it);
         }
         else
@@ -122,7 +141,7 @@ Patch* Quilt::getPatch(Patch *left, Patch *above)
         }
     }
 
-    return getRandom(patches, false);
+    return getRandom(patches, true);
 }
 
 /**
@@ -157,4 +176,13 @@ Patch* Quilt::getRandom(vector<Patch*> &patches, bool del)
 vector<Patch*> Quilt::getPatches()
 {
     return m_patches;
+}
+
+/**
+ * Gets the side length of each of the patches
+ * @return The size, in pixels, of 1 of the patches
+ */
+unsigned int Quilt::getPatchSize()
+{
+    return m_patchSize;
 }

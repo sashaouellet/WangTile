@@ -12,7 +12,6 @@ void test2();
 void test3();
 
 int main() {
-
     test3();
 
     return 0;
@@ -21,20 +20,28 @@ int main() {
 // Quilt patch extraction test
 void test3()
 {
-    BMPFile *file = new BMPFile("test.bmp");
-    Quilt *quilt = new Quilt(file, 640, 128);
+    BMPFile file("flowerpatch.bmp");
+    Quilt quilt(file, 123, 41);
 
     vector<vector<Patch*>> patches = quilt->generate();
+    vector<vector<Tile>> tiles;
+    unsigned int patchSize = quilt->getPatchSize();
+    tiles.resize(patches.size());
 
 	for (int i = 0 ; i < patches.size() ; i++)
 	{
 		for (int j = 0 ; j < patches[i].size() ; j++)
 		{
-			stringstream s;
-			s << i << "-" << j << ".bmp";
-			BMPFile::writeFile(128, 128, patches[i][j]->getPixelData(), s.str().c_str());
+            vector<char> c = {'a', 'b', 'c', 'd'};
+            Tile t(new BMPFile(patches[i][j]->getPixelData(), patchSize, patchSize), c);
+			tiles[i].push_back(t);
 		}
 	}
+
+    TileMap map(tiles, 3, 3);
+    unsigned char *data = map.makeArray();
+
+    BMPFile::writeFile(123, 123, data, "testPatches.bmp");
 }
 
 // Region extraction and output test

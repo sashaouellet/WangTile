@@ -5,6 +5,7 @@
  *
  * @author Sasha Ouellet - spaouellet@me.com - www.sashaouellet.com
  * @version 1.0 - 02/05/17
+ * @version 1.1 - 02/19/17 - Allowing construction via pre-developed vector array of Tiles
  */
 
 #ifndef WANGTILE_TILEMAP_H
@@ -24,8 +25,8 @@ private:
     uniform_int_distribution<int> m_distribution;
 
 public:
-    TileMap(vector<Tile>, unsigned int, unsigned int);
-	TileMap(vector<vector<Tile>>);
+    TileMap(vector<Tile>&, unsigned int, unsigned int);
+	TileMap(vector<vector<Tile>>&, unsigned int, unsigned int);
     void generate();
     Tile getRandom();
     void print();
@@ -33,6 +34,7 @@ public:
     void placeTile(Tile&, int, int, unsigned char*);
     int getPixelWidth();
     int getPixelHeight();
+	//TODO: addTile to original tile set method
 };
 
 #endif //WANGTILE_TILEMAP_H

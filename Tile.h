@@ -18,7 +18,7 @@ using namespace std;
 class Tile
 {
 private:
-    BMPFile* m_image;
+    BMPFile& m_image;
     vector<char> m_sideCodes;
 
 public:
@@ -27,12 +27,12 @@ public:
     static const int SOUTH = 2;
     static const int WEST = 3;
 
-    Tile(BMPFile*);
-	Tile(BMPFile*, vector<char>);
+    Tile(BMPFile&);
+	Tile(BMPFile&, vector<char>&);
     char getCodeAtSide(int);
     bool hasCodeAtSide(char, int);
     void print();
-    BMPFile* getImage();
+    BMPFile& getImage();
 };
 
 

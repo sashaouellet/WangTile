@@ -5,6 +5,7 @@
  *
  * @author Sasha Ouellet - spaouellet@me.com
  * @version 1.0 - 02/05/17
+ * @version 1.1 - 02/19/17 - Allowing construction via pre-developed vector array of Tiles
  */
 
 #include <cstdlib>
@@ -18,7 +19,7 @@
  * @param width The width, in number of tiles
  * @param height The height, in number of tiles
  */
-TileMap::TileMap(vector<Tile> tileSet, unsigned int width, unsigned int height)
+TileMap::TileMap(vector<Tile>& tileSet, unsigned int width, unsigned int height)
 {
     m_tileSet = tileSet;
     m_width = width;
@@ -28,12 +29,24 @@ TileMap::TileMap(vector<Tile> tileSet, unsigned int width, unsigned int height)
 }
 
 /**
+ * Constructs the tile map from the already generated tile set, in its grid format
+ * @param tiles
+ */
+TileMap::TileMap(vector<vector<Tile>> &tiles, unsigned int width, unsigned int height)
+{
+    m_tiles = tiles;
+    m_tileSet = tiles[0];
+    m_width = width;
+    m_height = height;
+}
+
+/**
  * Get the pixel width of the entire TileMap
  * @return The pixel width of the map
  */
 int TileMap::getPixelWidth()
 {
-    return m_tileSet[0].getImage()->getWidth() * m_width;
+    return m_tileSet[0].getImage().getWidth() * m_width;
 }
 
 /**
@@ -42,7 +55,7 @@ int TileMap::getPixelWidth()
  */
 int TileMap::getPixelHeight()
 {
-    return m_tileSet[0].getImage()->getHeight() * m_height;
+    return m_tileSet[0].getImage().getHeight() * m_height;
 }
 
 /**
@@ -185,10 +198,10 @@ unsigned char* TileMap::makeArray()
 void TileMap::placeTile(Tile &tile, int x, int y, unsigned char *data)
 {
     y = m_height - 1 - y;
-    BMPFile *image = tile.getImage();
-    unsigned char *imagePixels = image->getPixels();
-    int tileWidth = image->getWidth();
-    int size = tileWidth * image->getHeight() * 3;
+    BMPFile& image = tile.getImage();
+    const unsigned char *imagePixels = image.getPixels();
+    int tileWidth = image.getWidth();
+    int size = tileWidth * image.getHeight() * 3;
     int offset = y * m_width * size;
 
     for (int i = 0; i < size; i++)

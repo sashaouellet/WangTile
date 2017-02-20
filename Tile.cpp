@@ -15,10 +15,9 @@
  *
  * @param The bitmap file representing this Tile's pixel content
  */
-Tile::Tile(BMPFile* file)
-{
-    m_image = file;
-    m_sideCodes = util::parseFileNameForSideCodes(string(file->getFileName()), '_');
+Tile::Tile(BMPFile& file)
+: m_image(file) {
+    m_sideCodes = util::parseFileNameForSideCodes(string(file.getFileName()), '_');
 }
 
 /**
@@ -28,9 +27,8 @@ Tile::Tile(BMPFile* file)
  * @param file The bitmap file
  * @param codes The vector representing each side's code
  */
-Tile::Tile(BMPFile *file, vector<char> codes)
-{
-	m_image = file;
+Tile::Tile(BMPFile& file, vector<char>& codes)
+: m_image(file) {
 	m_sideCodes = codes;
 }
 
@@ -80,7 +78,7 @@ void Tile::print()
  * Get the image this Tile is associated with
  * @return The tile image
  */
-BMPFile* Tile::getImage()
+BMPFile& Tile::getImage()
 {
     return m_image;
 }

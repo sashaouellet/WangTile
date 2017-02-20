@@ -20,7 +20,7 @@ using namespace std;
 class Quilt
 {
 private:
-    BMPFile *m_source;
+    BMPFile& m_source;
     unsigned int m_dimension;
     unsigned int m_patchSize;
     vector<Patch*> m_patches;
@@ -32,11 +32,15 @@ public:
     const static int OVERLAP_DIVISOR = 6;
     constexpr static double BEST_FIT_MARGIN = 1.1;
 
-    Quilt(BMPFile *, unsigned int, unsigned int);
+    Quilt(BMPFile&, unsigned int, unsigned int);
     vector<vector<Patch*>> generate();
     vector<Patch*> getPatches();
     Patch* getPatch(Patch*, Patch*);
 	Patch* getRandom(vector<Patch*>&, bool);
+    unsigned int getPatchSize();
+	unsigned char* makeSeamsAndQuilt();
+
+    virtual ~Quilt();
 };
 
 #endif //WANGTILE_QUILT_H

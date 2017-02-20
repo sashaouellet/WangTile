@@ -14,20 +14,20 @@
 class Patch
 {
 private:
-    unsigned char* m_pixelData;
+    const unsigned char* m_pixelData;
     unsigned int* m_error;
     unsigned int m_dimension;
     unsigned int m_totalError;
 
 public:
-    Patch(unsigned char *, unsigned int);
+    Patch(const unsigned char *, unsigned int);
+    Patch(const Patch&);
     unsigned char* getPixelData();
     unsigned int getOverlapScore(Patch*, Patch*);
     unsigned int getDimension();
     unsigned int* getPixelAt(int, int);
     unsigned int getTotalError();
-
-    virtual ~Patch();
+    void calculateLeastCostBoundaries();
 };
 
 #endif //WANGTILE_PATCH_H

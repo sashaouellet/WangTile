@@ -11,12 +11,14 @@
 #include <cstring>
 #include "BMPFile.h"
 
+using namespace std;
+
 /**
  * Constructor for the BMPFile, given a specific file name to read. Will populate the pixelData array with the
  * R, G, B values of each pixel. This array's length is equal to 3 * width * height of the image (as found in the BMP
  * header)
  *
- * @param fileName The char array (string) containing the name of the BMP file to read
+ * @param fileName The char array (string) containing the name of the BMP file to read. Keeps a reference
  */
 BMPFile::BMPFile(const char* fileName)
 {
@@ -56,14 +58,17 @@ BMPFile::BMPFile(const char* fileName)
 BMPFile::BMPFile(unsigned char *pixelData, int width, int height)
 {
 	m_fileName = NULL;
-	m_pixelData = pixelData;
-	m_width = width;
+	m_pixelData = new unsigned char[width * height * 3];
+
+    copy(pixelData, pixelData + (width * height * 3), m_pixelData);
+
+    m_width = width;
 	m_height = height;
 }
 
 BMPFile::~BMPFile()
 {
-	delete[] m_pixelData;
+    delete[] m_pixelData;
 }
 
 /**
@@ -71,7 +76,7 @@ BMPFile::~BMPFile()
  *
  * @return The pixel data array of the BMP
  */
-unsigned char* BMPFile::getPixels()
+const unsigned char* BMPFile::getPixels()
 {
 	return m_pixelData;
 }
@@ -216,7 +221,7 @@ unsigned char* BMPFile::getPixelRegion(unsigned int x1, unsigned int y1, unsigne
  * Get the file name of this bitmap
  * @return The file name
  */
-const char*BMPFile::getFileName()
+const char* BMPFile::getFileName()
 {
     return m_fileName;
 }
