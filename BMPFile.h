@@ -28,7 +28,7 @@ private:
     int m_height;
 public:
 	BMPFile(const char*);
-	BMPFile(unsigned char*, int, int);
+	BMPFile(const unsigned char*, int, int);
     const unsigned char* getPixels();
     const char* getFileName();
 	void printPixelData();

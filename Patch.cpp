@@ -33,7 +33,7 @@ Patch::Patch(const Patch &patch)
  * Gets the pixel data array of this patch
  * @return The pixel data array
  */
-unsigned char* Patch::getPixelData()
+const unsigned char* Patch::getPixelData()
 {
     return m_pixelData;
 }

@@ -55,7 +55,7 @@ BMPFile::BMPFile(const char* fileName)
  * @param width The side length (in pixels) of the width of the bitmap
  * @param height The side length (in pixels) of the height of the bitmap
  */
-BMPFile::BMPFile(unsigned char *pixelData, int width, int height)
+BMPFile::BMPFile(const unsigned char *pixelData, int width, int height)
 {
 	m_fileName = NULL;
 	m_pixelData = new unsigned char[width * height * 3];
@@ -68,7 +68,7 @@ BMPFile::BMPFile(unsigned char *pixelData, int width, int height)
 
 BMPFile::~BMPFile()
 {
-    delete[] m_pixelData;
+//    delete[] m_pixelData;
 }
 
 /**

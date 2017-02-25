@@ -32,6 +32,11 @@ Tile::Tile(BMPFile& file, vector<char>& codes)
 	m_sideCodes = codes;
 }
 
+Tile::Tile(const Tile& tile)
+: m_image(tile.m_image) {
+	m_sideCodes = tile.m_sideCodes;
+}
+
 /**
  * Given the index, returns the code of the specified side. The sides are stored as follows:
  *

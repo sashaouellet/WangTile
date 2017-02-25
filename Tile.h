@@ -18,7 +18,7 @@ using namespace std;
 class Tile
 {
 private:
-    BMPFile& m_image;
+    BMPFile m_image;
     vector<char> m_sideCodes;
 
 public:
@@ -29,6 +29,7 @@ public:
 
     Tile(BMPFile&);
 	Tile(BMPFile&, vector<char>&);
+	Tile(const Tile&);
     char getCodeAtSide(int);
     bool hasCodeAtSide(char, int);
     void print();

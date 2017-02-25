@@ -22,7 +22,7 @@ private:
 public:
     Patch(const unsigned char *, unsigned int);
     Patch(const Patch&);
-    unsigned char* getPixelData();
+    const unsigned char* getPixelData();
     unsigned int getOverlapScore(Patch*, Patch*);
     unsigned int getDimension();
     unsigned int* getPixelAt(int, int);

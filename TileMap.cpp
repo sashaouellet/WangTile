@@ -82,8 +82,7 @@ void TileMap::generate()
             // Special case for first tile
             if (i == 0 && j == 0)
             {
-                Tile t = getRandom();
-                row.push_back(t);
+                row.push_back(getRandom());
             }
             // Special case for first row, don't need to check for row above
             else if (i == 0)
