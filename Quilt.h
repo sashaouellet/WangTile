@@ -23,7 +23,8 @@ private:
     BMPFile& m_source;
     unsigned int m_dimension;
     unsigned int m_patchSize;
-    vector<Patch*> m_patches;
+    vector<Patch*> m_patchSet;
+	vector<vector<Patch*>> m_patches;
     default_random_engine m_generator;
 
     void extractPatches();
@@ -33,12 +34,12 @@ public:
     constexpr static double BEST_FIT_MARGIN = 1.1;
 
     Quilt(BMPFile&, unsigned int, unsigned int);
-    vector<vector<Patch*>> generate();
-    vector<Patch*> getPatches();
+    void generate();
     Patch* getPatch(Patch*, Patch*);
 	Patch* getRandom(vector<Patch*>&, bool);
     unsigned int getPatchSize();
 	unsigned char* makeSeamsAndQuilt();
+    vector<vector<Patch*>> getPatches();
 
     virtual ~Quilt();
 };

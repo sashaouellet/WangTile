@@ -16,7 +16,7 @@ using namespace std;
 namespace util
 {
     vector<char> parseFileNameForSideCodes(string, char);
-    unsigned int l2NormDiff(unsigned int*, unsigned int*, int);
+    int l2NormDiff(int*, int*, int);
 };
 
 #endif //WANGTILE_UTIL_H

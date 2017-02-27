@@ -20,12 +20,12 @@ int main() {
 // Quilt patch extraction test
 void test3()
 {
-    BMPFile file("test.bmp");
-    Quilt quilt(file, 256, 64);
+    BMPFile file("flowerpatch.bmp");
+    Quilt quilt(file, 328, 41);
 
-    vector<vector<Patch*>> patches = quilt.generate();
+    quilt.generate();
+    vector<vector<Patch*>> patches = quilt.getPatches();
     vector<vector<Tile>> tiles;
-    unsigned int patchSize = quilt.getPatchSize();
     tiles.resize(patches.size());
 
 	for (int i = 0 ; i < patches.size() ; i++)
@@ -33,23 +33,23 @@ void test3()
 		for (int j = 0 ; j < patches[i].size() ; j++)
 		{
             vector<char> c = {'a', 'b', 'c', 'd'};
-            Tile t(*new BMPFile(patches[i][j]->getPixelData(), patchSize, patchSize), c);
+            Tile t(*new BMPFile(*patches[i][j]->getRGBPlane()), c);
 			tiles[i].push_back(t);
 		}
 	}
 
-    TileMap map(tiles, 4, 4);
+    TileMap map(tiles, 8, 8);
     unsigned char *data = map.makeArray();
 
-    BMPFile::writeFile(256, 256, data, "testPatches.bmp");
+    BMPFile::writeFile(328, 328, data, "testPatches.bmp");
 }
 
 // Region extraction and output test
 void test2()
 {
-    BMPFile* test = new BMPFile("flowerpatch.bmp");
+    BMPFile test("flowerpatch.bmp");
 
-    BMPFile::writeFile(41, 41, test->getPixelRegion(0, 0, 40, 40), "region.bmp");
+    BMPFile::writeFile(41, 41, test.getPlane()->getRegion(0, 0, 40, 40, true).getRawData(), "region.bmp");
 }
 
 // Tiling algorithm test

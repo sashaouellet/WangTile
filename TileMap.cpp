@@ -198,7 +198,7 @@ void TileMap::placeTile(Tile &tile, int x, int y, unsigned char *data)
 {
     y = m_height - 1 - y;
     BMPFile& image = tile.getImage();
-    const unsigned char *imagePixels = image.getPixels();
+    const unsigned char *imagePixels = image.getPlane()->getRawData();
     int tileWidth = image.getWidth();
     int size = tileWidth * image.getHeight() * 3;
     int offset = y * m_width * size;

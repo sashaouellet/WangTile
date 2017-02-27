@@ -16,6 +16,7 @@
 #include <fstream>
 #include <vector>
 #include <stdexcept>
+#include "RGBPlane.h"
 
 using namespace std;
 
@@ -23,16 +24,14 @@ class BMPFile
 {
 private:
     const char* m_fileName;
-    unsigned char* m_pixelData;
+    RGBPlane* m_pixelData;
 	int m_width;
     int m_height;
 public:
 	BMPFile(const char*);
-	BMPFile(const unsigned char*, int, int);
-    const unsigned char* getPixels();
+	BMPFile(const RGBPlane&);
+    RGBPlane* getPlane();
     const char* getFileName();
-	void printPixelData();
-	vector<unsigned int> getPixel(int, int);
 	static void writeFile(int, int, unsigned char*, const char*);
     int getWidth();
     int getHeight();

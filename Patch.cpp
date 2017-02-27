@@ -15,27 +15,44 @@
  *             of the original input image
  * @param dimension The length of the Patch edges
  */
-Patch::Patch(const unsigned char* data, unsigned int dimension)
+Patch::Patch(const RGBPlane& plane, unsigned int dimension)
 {
-    m_pixelData = data;
+    m_pixelData = new RGBPlane(plane);
     m_dimension = dimension;
+    m_error = new IntPlane(dimension, dimension);
     m_totalError = 0;
 }
 
 Patch::Patch(const Patch &patch)
 {
-    m_pixelData = patch.m_pixelData;
+    m_pixelData = new RGBPlane(*patch.getRGBPlane());
     m_dimension = patch.m_dimension;
+    m_error = new IntPlane(*patch.getErrorPlane());
     m_totalError = 0;
 }
 
+Patch::~Patch()
+{
+    delete m_pixelData;
+    delete m_error;
+}
+
 /**
- * Gets the pixel data array of this patch
- * @return The pixel data array
+ * Gets the pixel data plane of this patch
+ * @return The pixel data plane
  */
-const unsigned char* Patch::getPixelData()
+RGBPlane* Patch::getRGBPlane() const
 {
     return m_pixelData;
+}
+
+/**
+ * Gets the error data plane of this patch
+ * @return The error data plane
+ */
+IntPlane* Patch::getErrorPlane() const
+{
+    return m_error;
 }
 
 /**
@@ -53,7 +70,6 @@ const unsigned char* Patch::getPixelData()
 unsigned int Patch::getOverlapScore(Patch *left, Patch *top)
 {
     int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
-    m_error = new unsigned int[m_dimension * m_dimension];
 
     for (int i = 0 ; i < m_dimension ; i++)
     {
@@ -62,15 +78,15 @@ unsigned int Patch::getOverlapScore(Patch *left, Patch *top)
             // If top overlap region and has a patch above it
             if (i < overlap && top != nullptr)
             {
-                unsigned int error = util::l2NormDiff(getPixelAt(j, i), top->getPixelAt(j, m_dimension - overlap + i), 3);
-                m_error[i * m_dimension + j] = error;
+                int error = util::l2NormDiff(getPixelAt(j, i), top->getPixelAt(j, m_dimension - overlap + i), 3);
+                m_error->setPixelValueAt(j, i, error);
                 m_totalError += error;
             }
             // if left overlap region and has patch to the left of it
             else if (j < overlap && left != nullptr)
             {
-                unsigned int error = util::l2NormDiff(getPixelAt(j, i), left->getPixelAt(m_dimension - overlap + j, i), 3);
-                m_error[i * m_dimension + j] = error;
+                int error = util::l2NormDiff(getPixelAt(j, i), left->getPixelAt(m_dimension - overlap + j, i), 3);
+                m_error->setPixelValueAt(j, i, error);
                 m_totalError += error;
             }
         }
@@ -84,21 +100,19 @@ unsigned int Patch::getOverlapScore(Patch *left, Patch *top)
  * @param y The y coord of the pixel
  * @return Array containing the r, g, b values of the desired pixel
  */
-unsigned int* Patch::getPixelAt(int x, int y)
+int* Patch::getPixelAt(int x, int y)
 {
     if (x >= m_dimension || y >= m_dimension)
     {
         throw invalid_argument("Received x or y value that exceeds width or height of patch");
     }
 
-    unsigned int* data = new unsigned int[3];
+    int* data = new int[3];
+    vector<unsigned char> values = m_pixelData->getPixelValueAt(x, y, false);
 
-    x *= 3;
-    y *= 3;
-
-    data[0] = static_cast<unsigned int>(m_pixelData[y * m_dimension + x]);
-    data[1] = static_cast<unsigned int>(m_pixelData[y * m_dimension + x + 1]);
-    data[2] = static_cast<unsigned int>(m_pixelData[y * m_dimension + x + 2]);
+    data[0] = static_cast<int>(values[0]);
+    data[1] = static_cast<int>(values[1]);
+    data[2] = static_cast<int>(values[2]);
 
     return data;
 }

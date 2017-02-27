@@ -38,14 +38,22 @@ Quilt::Quilt(BMPFile& source, unsigned int dimension, unsigned int patchSize)
 Quilt::~Quilt()
 {
     vector<Patch*>::iterator it;
-    for (it = m_patches.begin() ; it < m_patches.end(); it++)
+    for (it = m_patchSet.begin() ; it < m_patchSet.end(); it++)
     {
         delete *it;
     }
 
     vector<vector<Patch*>>::iterator it2;
 
-//    for (it2 = )
+    for (it2 = m_patches.begin() ; it2 < m_patches.end() ; it2++)
+    {
+        vector<Patch*>::iterator it;
+
+        for (it = (*it2).begin() ; it < (*it2).end() ; it++)
+        {
+            delete *it;
+        }
+    }
 }
 
 /**
@@ -62,14 +70,13 @@ void Quilt::extractPatches()
         for (int j = 0 ; j < patchesPerSide ; j++)
         {
             int colLower = j * m_patchSize;
-            m_patches.push_back(new Patch(m_source.getPixelRegion(colLower, rowLower, colLower + m_patchSize - 1, rowLower + m_patchSize - 1), m_patchSize));
+            m_patchSet.push_back(new Patch(m_source.getPlane()->getRegion(colLower, rowLower, colLower + m_patchSize - 1, rowLower + m_patchSize - 1, true), m_patchSize));
         }
     }
 }
 
-vector<vector<Patch*>> Quilt::generate() // TODO make this void and keep track of vector inside here
+void Quilt::generate()
 {
-    vector<vector<Patch*>> patches;
 	unsigned int patchesPerSide = m_dimension / m_patchSize;
 
 	for (int i = 0; i < patchesPerSide; i++)
@@ -79,15 +86,13 @@ vector<vector<Patch*>> Quilt::generate() // TODO make this void and keep track o
 		for (int j = 0; j < patchesPerSide; j++)
 		{
 			Patch *left = j != 0 ? row[j - 1] : nullptr;
-			Patch *above = i != 0 ? patches[i - 1][j] : nullptr;
+			Patch *above = i != 0 ? m_patches[i - 1][j] : nullptr;
 
 			row.push_back(getPatch(left, above));
 		}
 
-        patches.push_back(row);
+        m_patches.push_back(row);
 	}
-
-	return patches;
 }
 
 unsigned char* Quilt::makeSeamsAndQuilt()
@@ -108,7 +113,7 @@ Patch* Quilt::getPatch(Patch *left, Patch *above)
 	// First patch in whole quilt, just pick a random one
 	if (left == nullptr && above == nullptr)
 	{
-        Patch* p = getRandom(m_patches, false);
+        Patch* p = getRandom(m_patchSet, false);
 		return new Patch(*p);
 	}
 
@@ -117,7 +122,7 @@ Patch* Quilt::getPatch(Patch *left, Patch *above)
 	unsigned int bestError = UINT_MAX;
 
 	// Loop through once to calculate overlap region errors
-    for (it = m_patches.begin() ; it < m_patches.end() ; it++)
+    for (it = m_patchSet.begin() ; it < m_patchSet.end() ; it++)
     {
         Patch *patch = new Patch(**it);
         unsigned int error = patch->getOverlapScore(left, above);
@@ -170,19 +175,16 @@ Patch* Quilt::getRandom(vector<Patch*> &patches, bool del)
 }
 
 /**
- * Gets the patch set for this quilt
- * @return The patch set
- */
-vector<Patch*> Quilt::getPatches()
-{
-    return m_patches;
-}
-
-/**
  * Gets the side length of each of the patches
+ *
  * @return The size, in pixels, of 1 of the patches
  */
 unsigned int Quilt::getPatchSize()
 {
     return m_patchSize;
+}
+
+vector<vector<Patch*>> Quilt::getPatches()
+{
+    return m_patches;
 }

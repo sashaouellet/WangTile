@@ -49,7 +49,7 @@ namespace util
      * @param size Size of the vectors
      * @return The l2 norm of the difference between the vectors
      */
-    unsigned int l2NormDiff(unsigned int *a, unsigned int *b, int size)
+    int l2NormDiff(int* a, int* b, int size)
     {
         int sum = 0;
 

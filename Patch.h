@@ -10,24 +10,29 @@
 #define WANGTILE_PATCH_H
 
 #include "util.h"
+#include "IntPlane.h"
+#include "RGBPlane.h"
 
 class Patch
 {
 private:
-    const unsigned char* m_pixelData;
-    unsigned int* m_error;
+    RGBPlane* m_pixelData;
+    IntPlane* m_error;
     unsigned int m_dimension;
     unsigned int m_totalError;
 
 public:
-    Patch(const unsigned char *, unsigned int);
+    Patch(const RGBPlane&, unsigned int);
     Patch(const Patch&);
-    const unsigned char* getPixelData();
+    RGBPlane* getRGBPlane() const;
+    IntPlane* getErrorPlane() const;
     unsigned int getOverlapScore(Patch*, Patch*);
     unsigned int getDimension();
-    unsigned int* getPixelAt(int, int);
+    int* getPixelAt(int, int);
     unsigned int getTotalError();
     void calculateLeastCostBoundaries();
+
+    virtual ~Patch();
 };
 
 #endif //WANGTILE_PATCH_H

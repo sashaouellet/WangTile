@@ -31,44 +31,46 @@ BMPFile::BMPFile(const char* fileName)
 	m_width = *(int*)&info[18];
 	m_height = *(int*)&info[22];
 	int size = 3 * m_width * m_height;
-	m_pixelData = new unsigned char[size]; // allocate 3 bytes per pixel
+	unsigned char* data = new unsigned char[size]; // allocate 3 bytes per pixel
 
-	fread(m_pixelData, sizeof(unsigned char), size, f); // read the rest of the data at once
+	fread(data, sizeof(unsigned char), size, f); // read the rest of the data at once
 	fclose(f);
 
+    m_pixelData = new RGBPlane(m_width, m_height);
+
+	for (int i = 0; i < m_height; i++)
+    {
+        for (int j = 0; j < m_width; j++)
+        {
+            int ind = i * (m_width * 3) + (j * 3);
+
+            m_pixelData->setPixelValueAt(j, i, data[ind], data[ind + 1], data[ind + 2], false);
+        }
+    }
+
 	// Flipping R and B values since they are stored backwards in BMPs
-	for (int i = 0; i < size; i += 3)
-	{
-		unsigned char tmp = m_pixelData[i];
-		m_pixelData[i] = m_pixelData[i + 2];
-		m_pixelData[i + 2] = tmp;
-	}
+	m_pixelData->flipRBValues();
 
 	m_fileName = fileName;
 }
 
 /**
- * Constructs the BMPFile from a given pixel data array that was derived from somewhere else, and not necessarily a
+ * Constructs the BMPFile from a given pixel plane that was derived from somewhere else, and not necessarily a
  * file, unlike the original constructor
  *
- * @param pixelData The data array that represents the RGB values of this bitmap file
- * @param width The side length (in pixels) of the width of the bitmap
- * @param height The side length (in pixels) of the height of the bitmap
+ * @param plane The plane that represents the RGB values of this bitmap file
  */
-BMPFile::BMPFile(const unsigned char *pixelData, int width, int height)
+BMPFile::BMPFile(const RGBPlane& plane)
 {
 	m_fileName = NULL;
-	m_pixelData = new unsigned char[width * height * 3];
-
-    copy(pixelData, pixelData + (width * height * 3), m_pixelData);
-
-    m_width = width;
-	m_height = height;
+    m_pixelData = new RGBPlane(plane);
+    m_width = plane.getWidth();
+	m_height = plane.getHeight();
 }
 
 BMPFile::~BMPFile()
 {
-//    delete[] m_pixelData;
+    delete m_pixelData;
 }
 
 /**
@@ -76,59 +78,9 @@ BMPFile::~BMPFile()
  *
  * @return The pixel data array of the BMP
  */
-const unsigned char* BMPFile::getPixels()
+RGBPlane* BMPFile::getPlane()
 {
 	return m_pixelData;
-}
-
-/**
- * Dumps out each pixel's R, G, B value to system out.
- *
- * NOTE: Due to how the BMP file protocol works, the data is stored bottom-up, so this information appears "reversed"
- */
-void BMPFile::printPixelData()
-{
-	for (int j = 0; j < m_height * 3; j += 3)
-	{
-		for (int i = 0; i < m_width * 3; i += 3)
-		{
-			cout << "R: " << static_cast<int>(m_pixelData[j * m_width + i]) << " G: " << static_cast<int>(m_pixelData[j * m_width + i + 1]) << " B: " << static_cast<int>(m_pixelData[j * m_width + i + 2]) << endl;
-		}
-	}
-}
-
-/**
- * Gets the pixel data at the given x, y value
- *
- * @param x The x value of the pixel wanted
- * @param y The y value of the pixel wanted
- * @return A length 3 vector containing the R, G, B values of the desired pixel at x, y
- * @throws invalid_argument if the given x or y values exceeds the width or height of the image
- */
-vector<unsigned int> BMPFile::getPixel(int x, int y)
-{
-	if (x >= m_width || y >= m_height)
-	{
-		throw invalid_argument("Received x or y value that exceeds width or height of image");
-	}
-
-	vector<unsigned int> data;
-
-	x *= 3;
-
-	y = m_height - 1 - y; // Since BMP is stored bottom-up so we need to flip it
-	y *= 3;
-
-	unsigned int r = static_cast<unsigned int>(m_pixelData[y * m_width + x]);
-	unsigned int g = static_cast<unsigned int>(m_pixelData[y * m_width + x + 1]);
-	unsigned int b = static_cast<unsigned int>(m_pixelData[y * m_width + x + 2]);
-
-	data.push_back(r);
-	data.push_back(g);
-	data.push_back(b);
-
-	return data;
-
 }
 
 /**
@@ -208,9 +160,9 @@ unsigned char* BMPFile::getPixelRegion(unsigned int x1, unsigned int y1, unsigne
         for (int j = x1 ; j <= x2 ; j++)
         {
             int x = j * 3;
-            data[dataIndex++] = m_pixelData[y * m_width + x];
-            data[dataIndex++] = m_pixelData[y * m_width + x + 1];
-            data[dataIndex++] = m_pixelData[y * m_width + x + 2];
+//            data[dataIndex++] = m_pixelData[y * m_width + x];
+//            data[dataIndex++] = m_pixelData[y * m_width + x + 1];
+//            data[dataIndex++] = m_pixelData[y * m_width + x + 2];
         }
     }
 
