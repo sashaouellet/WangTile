@@ -55,7 +55,7 @@ namespace util
 
         for (int i = 0; i < size; i++)
         {
-            sum += (a - b) * (a - b);
+            sum += (a[i] - b[i]) * (a[i] - b[i]);
         }
 
         delete [] a;

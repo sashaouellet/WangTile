@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <iostream>
 #include "IntPlane.h"
 
 using namespace std;
@@ -90,4 +91,28 @@ void IntPlane::setPixelValueAt(int x, int y, int value)
     }
 
     m_pixelData[getIndexFromPoint(x, y)] = value;
+}
+
+/**
+ * Fills the entire plane with the specified value
+ * @param value The integer value to assign to every spot in the plane
+ */
+void IntPlane::fill(int value)
+{
+	std::fill(m_pixelData, m_pixelData + (m_width * m_height), value);
+}
+
+/**
+ * For debug purposes
+ */
+void IntPlane::print()
+{
+	for (int i = 0 ; i < m_height ; i++)
+	{
+		for (int j = 0 ; j < m_width ; j++)
+		{
+			cout << getPixelValueAt(j, i) << " ";
+		}
+		cout << endl;
+	}
 }

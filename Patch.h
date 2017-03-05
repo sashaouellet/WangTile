@@ -18,19 +18,27 @@ class Patch
 private:
     RGBPlane* m_pixelData;
     IntPlane* m_error;
+	IntPlane* m_boundaries;
     unsigned int m_dimension;
     unsigned int m_totalError;
+	int m_cornerCutX;
+	int m_cornerCutY;
 
 public:
     Patch(const RGBPlane&, unsigned int);
     Patch(const Patch&);
     RGBPlane* getRGBPlane() const;
     IntPlane* getErrorPlane() const;
+	IntPlane* getBoundaries() const;
     unsigned int getOverlapScore(Patch*, Patch*);
     unsigned int getDimension();
     int* getPixelAt(int, int);
     unsigned int getTotalError();
-    void calculateLeastCostBoundaries();
+    void calculateLeastCostBoundaries(Patch*, Patch*, Patch*, Patch*, bool);
+	void cutTopBoundary(Patch*, Patch*);
+	void cutLeftBoundary(Patch*, Patch*);
+	vector<int> getCornerCut();
+	void determineCorner();
 
     virtual ~Patch();
 };

@@ -10,18 +10,30 @@ using namespace std;
 void test1();
 void test2();
 void test3();
+void test4();
 
 int main() {
-    test3();
+    test4();
 
     return 0;
+}
+
+void test4()
+{
+	BMPFile file("test.bmp");
+	Quilt quilt(file, 256, 64);
+
+	quilt.generate();
+	vector<vector<Patch*>> patches = quilt.getPatches();
+
+	quilt.makeSeamsAndQuilt();
 }
 
 // Quilt patch extraction test
 void test3()
 {
-    BMPFile file("flowerpatch.bmp");
-    Quilt quilt(file, 328, 41);
+    BMPFile file("test.bmp");
+    Quilt quilt(file, 256, 64);
 
     quilt.generate();
     vector<vector<Patch*>> patches = quilt.getPatches();
@@ -33,15 +45,15 @@ void test3()
 		for (int j = 0 ; j < patches[i].size() ; j++)
 		{
             vector<char> c = {'a', 'b', 'c', 'd'};
-            Tile t(*new BMPFile(*patches[i][j]->getRGBPlane()), c);
+            Tile t(*new BMPFile(*(patches[i][j]->getRGBPlane())), c);
 			tiles[i].push_back(t);
 		}
 	}
 
-    TileMap map(tiles, 8, 8);
+    TileMap map(tiles, 4, 4);
     unsigned char *data = map.makeArray();
 
-    BMPFile::writeFile(328, 328, data, "testPatches.bmp");
+    BMPFile::writeFile(256, 256, data, "testPatches.bmp");
 }
 
 // Region extraction and output test

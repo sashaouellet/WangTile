@@ -23,6 +23,8 @@ public:
     IntPlane(const IntPlane&);
     int getPixelValueAt(int, int);
     void setPixelValueAt(int, int, int);
+	void fill(int);
+	void print();
 
     virtual ~IntPlane();
 };

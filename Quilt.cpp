@@ -97,7 +97,26 @@ void Quilt::generate()
 
 unsigned char* Quilt::makeSeamsAndQuilt()
 {
+	unsigned int patchesPerSide = m_dimension / m_patchSize;
 
+	for (int i = patchesPerSide - 1; i >= 0; i--)
+	{
+		for (int j = patchesPerSide - 1; j >= 0; j--)
+		{
+			Patch* left = j != 0 ? m_patches[i][j - 1] : nullptr;
+			Patch* top = i != 0 ? m_patches[i - 1][j] : nullptr;
+			Patch* right = j != patchesPerSide - 1 ? m_patches[i][j + 1] : nullptr;
+			Patch* bottom = i != patchesPerSide - 1 ? m_patches[i + 1][j] : nullptr;
+
+			if (i == 1 && j == 1)
+			{
+				m_patches[i][j]->calculateLeastCostBoundaries(left, right, top, bottom, true);
+			}
+			else {
+				m_patches[i][j]->calculateLeastCostBoundaries(left, right, top, bottom, false);
+			}
+		}
+	}
 }
 
 /**

@@ -48,6 +48,8 @@ BMPFile::BMPFile(const char* fileName)
         }
     }
 
+	delete [] data;
+
 	// Flipping R and B values since they are stored backwards in BMPs
 	m_pixelData->flipRBValues();
 
@@ -70,7 +72,7 @@ BMPFile::BMPFile(const RGBPlane& plane)
 
 BMPFile::~BMPFile()
 {
-    delete m_pixelData;
+//    delete m_pixelData;
 }
 
 /**
