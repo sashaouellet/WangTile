@@ -36,3 +36,7 @@ This is the input image that patches are extracted from. The images below show t
 ![Method #2](imageQuilt.bmp)
  
  Method 2 (barely any seams, but a lot of artifacts due to ragged cut edges)
+ 
+ ![LargeFormat](imageQuilt_500.bmp)
+ 
+ 500x500 output using Method 2
