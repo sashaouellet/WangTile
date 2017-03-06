@@ -15,6 +15,24 @@ Below is a tile set of size 16 that can aperiodically tile an infinite plane. Ea
  
  As you can see, adjacent edges have the same color, which in this case is a visual representation of the edge codes.
  
-## To do
+## Texture Synthesis
+
+Texture synthesis is based on the image quilting algorithm presented by Efros and Freeman in their paper ["Image Quilting for Texture Synthesis and Transfer"](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/papers/efros-siggraph01.pdf).
+
+This is not fully implemented correctly yet. Ideally, the seam would be the *cumulative* least cost path through the overlap surface of 2 patches. However, due to time constraints I have resorted to implementing 2 different, simpler methods.
+
+The first chooses the least cost pixel at one end of the overlap surface, and works its way up from there, with a max offset from one point along the cut to another of +/- 1. This makes the cut seem continuous.
+
+The other method picks the least cost pixel at every single location as we travel in either x/y, meaning the resulting cut does not seem continuous, but rather very jagged.
+
+![Input Texture](flowerpatch.bmp)
+
+This is the input image that patches are extracted from. The images below show the results of "quilting" said patches together.
+
+![Method #1](imageQuilt_old.bmp)
  
- Actual synthesis of a texture must now be implemented. The goal is to allow input of a single "source" texture bitmap that can then be broken apart and reconstructed into an appropriate Wang Tile set  (multiple tiles, 16+) that can aperiodically tile a plane of arbitrary size.
+ Method 1 (visible seams - since this is quite unlikely to be the least cost cut)
+
+![Method #2](imageQuilt.bmp)
+ 
+ Method 2 (barely any seams, but a lot of artifacts due to ragged cut edges)
