@@ -206,8 +206,8 @@ void Patch::calculateLeastCostBoundaries(Patch* left, Patch* top)
         }
     }
 
-	getBoundaries()->print();
-    cout << endl;
+//	getBoundaries()->print();
+//    cout << endl;
 }
 
 /**
