@@ -21,24 +21,27 @@ class Quilt
 {
 private:
     BMPFile& m_source;
-    unsigned int m_dimension;
-    unsigned int m_patchSize;
+    int m_dimension;
+    int m_patchesPerSide;
+    int m_patchSize;
     vector<Patch*> m_patchSet;
 	vector<vector<Patch*>> m_patches;
+	RGBPlane* m_output;
     default_random_engine m_generator;
 
     void extractPatches();
+    void setOutputPixel(Patch*, int, int, int, int);
 
 public:
     const static int OVERLAP_DIVISOR = 6;
     constexpr static double BEST_FIT_MARGIN = 1.1;
 
-    Quilt(BMPFile&, unsigned int, unsigned int);
+    Quilt(BMPFile&, int, int);
     void generate();
     Patch* getPatch(Patch*, Patch*);
 	Patch* getRandom(vector<Patch*>&, bool);
-    unsigned int getPatchSize();
-	unsigned char* makeSeamsAndQuilt();
+    int getDimension();
+	RGBPlane* makeSeamsAndQuilt();
     vector<vector<Patch*>> getPatches();
 
     virtual ~Quilt();

@@ -176,18 +176,38 @@ void Patch::calculateLeastCostBoundaries(Patch* left, Patch* top)
 	{
 		for (int j = 0; j < m_dimension; j++)
 		{
+            int val = m_boundaries->getPixelValueAt(j, i);
+
 			if (i < corner[1] && j < corner[0])
 			{
 				m_boundaries->setPixelValueAt(j, i, 3);
 			}
-			else if (m_boundaries->getPixelValueAt(j, i) == 0)
+			else if (val == 0)
 			{
 				m_boundaries->setPixelValueAt(j, i, 1);
 			}
+            else if (val == 2)
+            {
+                m_boundaries->setPixelValueAt(j, i, 1);
+            }
 		}
 	}
 
+    for (int i = 0; i < m_dimension; i++)
+    {
+        for (int j = 0; j < m_dimension; j++)
+        {
+            int val = m_boundaries->getPixelValueAt(j, i);
+
+            if (val > 1)
+            {
+                m_boundaries->setPixelValueAt(j, i, 0);
+            }
+        }
+    }
+
 	getBoundaries()->print();
+    cout << endl;
 }
 
 /**
@@ -216,7 +236,7 @@ void Patch::cutTopBoundary(Patch* top)
 
 	for (int x = m_dimension - 1; x >= 0; x--)
 	{
-		if (previousRow == -1) // Haven't determined a starting cut yet
+		if (true) // Haven't determined a starting cut yet
 		{
 			int smallest = m_error->getPixelValueAt(x, 0);
 			int index = 0;
@@ -291,7 +311,7 @@ void Patch::cutLeftBoundary(Patch* left)
 
 	for (int y = m_dimension - 1; y >= 0; y--)
 	{
-		if (previousCol == -1) // Haven't determined starting cut yet
+		if (true) // Haven't determined starting cut yet
 		{
 			int smallest = m_error->getPixelValueAt(0, y);
 			int index = 0;

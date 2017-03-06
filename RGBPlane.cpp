@@ -40,7 +40,7 @@ RGBPlane::RGBPlane(const RGBPlane& plane)
 
 RGBPlane::~RGBPlane()
 {
-    delete [] m_pixelData;
+//    delete [] m_pixelData;
 }
 
 /**

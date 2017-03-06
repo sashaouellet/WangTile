@@ -16,44 +16,50 @@
  * that can be used for the quilting process.
  *
  * @param source The source bitmap image to extract patches from
- * @param dimension The side length of the final outputted, quilted texture
+ * @param patchesPerSide The number of patches to make along each side of the sqaure quilt
  * @param patchSize The side length of each patch that will be extracted from the source bitmap. Larger patch size
  *                  increases efficiency of quilting, but the output will be repetitive. Too small a patch size may
  *                  result in a loss of key details from the source image.
  */
-Quilt::Quilt(BMPFile& source, unsigned int dimension, unsigned int patchSize)
+Quilt::Quilt(BMPFile& source, int patchesPerSide, int patchSize)
  : m_source(source) {
     if (source.getWidth() % patchSize != 0)
     {
         throw invalid_argument("Patch size must be whole divisor of input source image");
     }
 
-    m_dimension = dimension;
+    int overlap = patchSize / Quilt::OVERLAP_DIVISOR;
+
+    m_dimension = (patchesPerSide * patchSize) - ((patchesPerSide - 1) * overlap);
+    m_patchesPerSide = patchesPerSide;
     m_patchSize = patchSize;
     m_generator = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
+    m_output = new RGBPlane(m_dimension, m_dimension);
 
     extractPatches();
 }
 
 Quilt::~Quilt()
 {
-    vector<Patch*>::iterator it;
-    for (it = m_patchSet.begin() ; it < m_patchSet.end(); it++)
-    {
-        delete *it;
-    }
+//    vector<Patch*>::iterator it;
+//    for (it = m_patchSet.begin() ; it < m_patchSet.end(); it++)
+//    {
+//        delete *it;
+//    }
 
-    vector<vector<Patch*>>::iterator it2;
+//    vector<vector<Patch*>>::iterator it2;
+//
+//    for (it2 = m_patches.begin() ; it2 < m_patches.end() ; it2++)
+//    {
+//        vector<Patch*>::iterator it3;
+//
+//        for (it3 = (*it2).begin() ; it3 < (*it2).end() ; it3++)
+//        {
+//            delete *it3;
+//        }
+//    }
 
-    for (it2 = m_patches.begin() ; it2 < m_patches.end() ; it2++)
-    {
-        vector<Patch*>::iterator it;
-
-        for (it = (*it2).begin() ; it < (*it2).end() ; it++)
-        {
-            delete *it;
-        }
-    }
+//    delete m_output;
 }
 
 /**
@@ -77,13 +83,11 @@ void Quilt::extractPatches()
 
 void Quilt::generate()
 {
-	unsigned int patchesPerSide = m_dimension / m_patchSize;
-
-	for (int i = 0; i < patchesPerSide; i++)
+	for (int i = 0; i < m_patchesPerSide; i++)
 	{
 		vector<Patch*> row;
 
-		for (int j = 0; j < patchesPerSide; j++)
+		for (int j = 0; j < m_patchesPerSide; j++)
 		{
 			Patch* left = j != 0 ? row[j - 1] : nullptr;
 			Patch* above = i != 0 ? m_patches[i - 1][j] : nullptr;
@@ -93,26 +97,55 @@ void Quilt::generate()
 
         m_patches.push_back(row);
 	}
-
-    // Iterate again to assign neighbours
-
 }
 
-unsigned char* Quilt::makeSeamsAndQuilt()
+RGBPlane* Quilt::makeSeamsAndQuilt()
 {
-	int patchesPerSide = m_dimension / m_patchSize;
-
-	for (int i = 0; i < patchesPerSide; i++)
+	for (int i = 0; i < m_patchesPerSide; i++)
 	{
-		for (int j = 0; j < patchesPerSide; j++)
+        cout << "ROW: " << i << endl;
+		for (int j = 0; j < m_patchesPerSide; j++)
 		{
+            cout << "\tCOL: " << j << endl;
 			Patch* left = j != 0 ? m_patches[i][j - 1] : nullptr;
 			Patch* top = i != 0 ? m_patches[i - 1][j] : nullptr;
 
 			m_patches[i][j]->calculateLeastCostBoundaries(left, top);
-			cout << endl;
+
+            for (int y = 0; y < m_patchSize; y++)
+            {
+                for (int x = 0; x < m_patchSize; x++)
+                {
+                    setOutputPixel(m_patches[i][j], j, i, x, y);
+                }
+            }
 		}
 	}
+
+    return m_output;
+}
+
+/**
+ * Sets the value of the output plane's pixel given the specified patch
+ * @param patch The patch to extract the specific pixel from
+ * @param patchPosX The x position of the patch in the space of THIS QUILT. This is the patch's position
+ * @param patchPosY The y position of the patch in the space of THIS QUILT. This is the patch's position
+ * @param x The x position of the PIXEL in the patch
+ * @param y The y position of the PIXEL in the patch
+ */
+void Quilt::setOutputPixel(Patch* patch, int patchPosX, int patchPosY, int x, int y)
+{
+    int overlap = m_patchSize / Quilt::OVERLAP_DIVISOR;
+    int quiltX = (patchPosX * (m_patchSize - overlap)) + x;
+    int quiltY = (patchPosY * (m_patchSize - overlap)) + y;
+
+    int* pixel = patch->getPixelAt(x, y);
+    unsigned char mask = (unsigned char) patch->getBoundaries()->getPixelValueAt(x, y);
+
+    if (mask)
+    {
+        m_output->setPixelValueAt(quiltX, quiltY, (unsigned char) pixel[0], (unsigned char) pixel[1], (unsigned char) pixel[2], true);
+    }
 }
 
 /**
@@ -134,13 +167,13 @@ Patch* Quilt::getPatch(Patch *left, Patch *above)
 
 	vector<Patch*> patches;
 	vector<Patch*>::iterator it;
-	unsigned int bestError = UINT_MAX;
+	int bestError = INT_MAX;
 
 	// Loop through once to calculate overlap region errors
     for (it = m_patchSet.begin() ; it < m_patchSet.end() ; it++)
     {
         Patch *patch = new Patch(**it);
-        unsigned int error = patch->getOverlapScore(left, above);
+        int error = patch->getOverlapScore(left, above);
         bestError = error < bestError ? error : bestError;
 
         patches.push_back(patch);
@@ -190,13 +223,13 @@ Patch* Quilt::getRandom(vector<Patch*> &patches, bool del)
 }
 
 /**
- * Gets the side length of each of the patches
+ * Gets the dimension of the quilt (side length)
  *
- * @return The size, in pixels, of 1 of the patches
+ * @return The size, in pixels, of of the Quilt edges
  */
-unsigned int Quilt::getPatchSize()
+int Quilt::getDimension()
 {
-    return m_patchSize;
+    return m_dimension;
 }
 
 vector<vector<Patch*>> Quilt::getPatches()

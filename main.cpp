@@ -20,13 +20,14 @@ int main() {
 
 void test4()
 {
-	BMPFile file("test.bmp");
-	Quilt quilt(file, 256, 64);
+	BMPFile file("D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\flowerpatch.bmp");
+	Quilt quilt(file, 4, 41);
 
 	quilt.generate();
-	vector<vector<Patch*>> patches = quilt.getPatches();
 
-	quilt.makeSeamsAndQuilt();
+	RGBPlane* output = quilt.makeSeamsAndQuilt();
+
+    BMPFile::writeFile(quilt.getDimension(), quilt.getDimension(), output->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\imageQuilt.bmp");
 }
 
 // Quilt patch extraction test
