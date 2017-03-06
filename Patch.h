@@ -19,26 +19,37 @@ private:
     RGBPlane* m_pixelData;
     IntPlane* m_error;
 	IntPlane* m_boundaries;
-    unsigned int m_dimension;
-    unsigned int m_totalError;
+    Patch* m_left;
+    Patch* m_right;
+    Patch* m_top;
+    Patch* m_bottom;
+    int m_dimension;
+    int m_totalError;
 	int m_cornerCutX;
 	int m_cornerCutY;
 
 public:
-    Patch(const RGBPlane&, unsigned int);
+    Patch(const RGBPlane&, int);
     Patch(const Patch&);
     RGBPlane* getRGBPlane() const;
     IntPlane* getErrorPlane() const;
 	IntPlane* getBoundaries() const;
-    unsigned int getOverlapScore(Patch*, Patch*);
-    unsigned int getDimension();
+    Patch* getLeft();
+    Patch* getRight();
+    Patch* getTop();
+    Patch* getBottom();
+    void setNeighbours(Patch*, Patch*, Patch*, Patch*);
+    int getOverlapScore(Patch*, Patch*);
+    int getDimension();
     int* getPixelAt(int, int);
-    unsigned int getTotalError();
-    void calculateLeastCostBoundaries(Patch*, Patch*, Patch*, Patch*, bool);
-	void cutTopBoundary(Patch*, Patch*);
-	void cutLeftBoundary(Patch*, Patch*);
+    int getTotalError();
+    void calculateLeastCostBoundaries(bool);
+	void cutTopBoundary();
+	void cutLeftBoundary();
 	vector<int> getCornerCut();
 	void determineCorner();
+    void interpolateMask();
+    vector<vector<int>> findBestHorizontalPath(int, int, int, int);
 
     virtual ~Patch();
 };

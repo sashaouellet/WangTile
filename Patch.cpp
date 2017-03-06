@@ -6,16 +6,18 @@
  * @version 1.0 - 02/13/17
  */
 
+#include <limits.h>
 #include "Patch.h"
 #include "Quilt.h"
 
 /**
  * The default constructor for the Patch. Uses the given unsigned char array as its pixel data map.
+ *
  * @param data The pixel data for this particular patch. This is derived from a pre-determined square dimension segment
  *             of the original input image
  * @param dimension The length of the Patch edges
  */
-Patch::Patch(const RGBPlane& plane, unsigned int dimension)
+Patch::Patch(const RGBPlane& plane, int dimension)
 {
     m_pixelData = new RGBPlane(plane);
     m_dimension = dimension;
@@ -24,6 +26,10 @@ Patch::Patch(const RGBPlane& plane, unsigned int dimension)
     m_totalError = 0;
 	m_cornerCutX = 0;
 	m_cornerCutY = 0;
+    m_left = nullptr;
+    m_right = nullptr;
+    m_top = nullptr;
+    m_bottom = nullptr;
 }
 
 Patch::Patch(const Patch &patch)
@@ -35,6 +41,10 @@ Patch::Patch(const Patch &patch)
     m_totalError = 0;
 	m_cornerCutX = patch.m_cornerCutX;
 	m_cornerCutY = patch.m_cornerCutY;
+    m_left = patch.m_left;
+    m_right = patch.m_right;
+    m_top = patch.m_top;
+    m_bottom = patch.m_bottom;
 }
 
 Patch::~Patch()
@@ -42,6 +52,10 @@ Patch::~Patch()
     delete m_pixelData;
     delete m_error;
 	delete m_boundaries;
+//    delete m_left;
+//    delete m_right;
+//    delete m_top;
+//    delete m_bottom;
 }
 
 /**
@@ -64,12 +78,50 @@ IntPlane* Patch::getErrorPlane() const
 
 /**
  * Gets the boundary of the Patch, where the cuts will be made. 0 on the plane means
- * the pixel is untouched. 1 signfies that the cut travels through that pixel.
+ * the pixel is untouched. 1 signifies that the cut travels through that pixel.
+ *
  * @return The boundaries plane
  */
 IntPlane* Patch::getBoundaries() const
 {
 	return m_boundaries;
+}
+
+Patch* Patch::getLeft()
+{
+    return m_left;
+}
+
+Patch* Patch::getRight()
+{
+    return m_right;
+}
+
+Patch* Patch::getTop()
+{
+    return m_top;
+}
+
+Patch* Patch::getBottom()
+{
+    return m_bottom;
+}
+
+/**
+ * Sets the neighbours for this patch. Any of these can be nullptr so signal that there is no neighbor in that
+ * position
+ *
+ * @param left The patch to the left
+ * @param right The patch to the right
+ * @param top The patch above
+ * @param bottom The patch below
+ */
+void Patch::setNeighbours(Patch* left, Patch* right, Patch* top, Patch* bottom)
+{
+    m_left = left;
+    m_right = right;
+    m_top = top;
+    m_bottom = bottom;
 }
 
 /**
@@ -84,7 +136,7 @@ IntPlane* Patch::getBoundaries() const
  * @param top The patch above this patch, nullptr if this is the topmost row
  * @return The total error of the overlap region
  */
-unsigned int Patch::getOverlapScore(Patch *left, Patch *top)
+int Patch::getOverlapScore(Patch *left, Patch *top)
 {
     int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
 
@@ -139,7 +191,7 @@ int* Patch::getPixelAt(int x, int y)
  * @return The total summed error of the overlap region
  * @see Patch::getOverlapScore(Patch*, Patch*)
  */
-unsigned int Patch::getTotalError()
+int Patch::getTotalError()
 {
     return m_totalError;
 }
@@ -148,7 +200,7 @@ unsigned int Patch::getTotalError()
  * Gets the side length of the patch
  * @return The side length (pixels) of the patch
  */
-unsigned int Patch::getDimension()
+int Patch::getDimension()
 {
     return m_dimension;
 }
@@ -156,48 +208,111 @@ unsigned int Patch::getDimension()
 /**
  * Calculates the cut that needs to be made through this patch's pixels in order to produce the smallest margin of error
  * when quilting it in relation to the provided left and top patches
- * @param left The left patch, nullptr if this is the leftmost in the row
- * @param right The right patch, nullptr if this is the rightmost in the row
- * @param top The patch above this one, nullptr if this is the first row
- * @param bottom The patch below this one, nullptr if this is the last row
  */
-void Patch::calculateLeastCostBoundaries(Patch* left, Patch* right, Patch* top, Patch* bottom, bool print)
+void Patch::calculateLeastCostBoundaries(bool print)
 {
 	m_boundaries->fill(0);
 
-	cutTopBoundary(left, right);
-	cutLeftBoundary(top, bottom);
+	cutTopBoundary();
+	cutLeftBoundary();
 
-	m_error->print();
-	cout << endl;
-	m_boundaries->print();
+    int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
+
+//	if (m_bottom != nullptr)
+//    {
+//        // Use bottom top cut for this patch's bottom boundary cut
+//        int startX = m_left != nullptr? m_bottom->getCornerCut()[0] + 1 : 0;
+//        int endX = m_bottom->getRight() != nullptr ? m_bottom->getRight()->getCornerCut()[0] : m_dimension;
+//
+//        int startY = m_dimension - overlap;
+//        int endY = m_dimension;
+//
+//        for (int x = startX; x < endX; x++)
+//        {
+//            for (int y = startY; y < endY; y++)
+//            {
+//                if (m_bottom->getBoundaries()->getPixelValueAt(x, y - (m_dimension - overlap)) == 1)
+//                {
+//                    getBoundaries()->setPixelValueAt(x, y - 1, 1);
+//                }
+//            }
+//        }
+//    }
+//
+//    if (m_right != nullptr)
+//    {
+//        // Use right left cut for this patch's right boundary cut
+//        int startY = m_top != nullptr ? m_right->getCornerCut()[1] + 1 : 0;
+//        int endY = m_right->getBottom() != nullptr ? m_right->getBottom()->getCornerCut()[1] : m_dimension;
+//
+//        int startX = m_dimension - overlap;
+//        int endX = m_dimension;
+//
+//        for (int y = startY; y < endY; y++)
+//        {
+//            for (int x = startX; x < endX; x++)
+//            {
+//                if (m_right->getBoundaries()->getPixelValueAt(x - (m_dimension - overlap), y) == 1)
+//                {
+//                    getBoundaries()->setPixelValueAt(x - 1, y, 1);
+//                }
+//            }
+//        }
+//    }
+
+//    interpolateMask();
+
+    if (print)
+    {
+        m_boundaries->print();
+        cout << endl;
+    }
 }
 
 /**
- * Makes the cut along the top overlap region, given the Patches to the left and right of this one.
- *
- * @param left The patch to the left, nullptr if this is the leftmost Patch in the row. We will cut all the way to
- * 		        the end if this is the case. Otherwise, we will create a corner
- * @param right The patch to the right, nullptr if this is the rightmost Patch in the row. We use this patch to determine
- * 				the starting point corner of where the seam on this Patch begins
+ * Makes the cut along the top overlap region
  */
-void Patch::cutTopBoundary(Patch* left, Patch* right)
+void Patch::cutTopBoundary()
 {
-	int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
+    int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
+
+    if (m_top == nullptr)
+    {
+        int xEnd = -1;
+
+        if (m_left != nullptr)
+        {
+            for (int x = 0; x < overlap; x++) // Find stopping point (x) of left seam first
+            {
+                if (getBoundaries()->getPixelValueAt(x, 0) == 1)
+                {
+                    xEnd = x;
+                    break;
+                }
+            }
+        }
+
+        for (int x = xEnd + 1; x < m_dimension; x++)
+        {
+            getBoundaries()->setPixelValueAt(x, 0, 1);
+        }
+        return;
+    }
+
 	int startX = m_dimension - 1;
 
 	int previousRow = -1; // We keep track as we move in the X direction where (in Y) the previous column was cut at
 	// since we can only go within -1 -> +1 from that for the next cut
 
-	if (right != nullptr)
+	if (m_right != nullptr)
 	{
-		startX = m_dimension - overlap + right->getCornerCut()[0] - 1;
-		previousRow = right->getCornerCut()[1];
+		startX = m_dimension - overlap + m_right->getCornerCut()[0] - 1;
+		previousRow = m_right->getCornerCut()[1];
 	}
 
 	int endX = -1;
 
-	if (left != nullptr)
+	if (m_left != nullptr)
 	{
 		determineCorner();
 		endX = getCornerCut()[0];
@@ -205,7 +320,7 @@ void Patch::cutTopBoundary(Patch* left, Patch* right)
 
 	for (int x = startX; x >= endX + 1; x--)
 	{
-		if (x == m_dimension - 1 && right != nullptr) // Haven't determined a starting cut yet
+		if (x == m_dimension - 1 && m_right == nullptr) // Haven't determined a starting cut yet
 		{
 			int smallest = m_error->getPixelValueAt(x, 0);
 			int index = 0;
@@ -247,36 +362,56 @@ void Patch::cutTopBoundary(Patch* left, Patch* right)
 }
 
 /**
- * Makes the cut along the left overlap region, given the Patches above and below this one.
- *
- * @param top The patch above, determines if we should cut all the way to the top of this Patch, or stop at a corner
- * @param bottom The patch below, nullptr if this is the last row. We use this patch to determine
- * 				the starting point corner of where the seam on this Patch begins
+ * Makes the cut along the left overlap region
  */
-void Patch::cutLeftBoundary(Patch* top, Patch* bottom)
+void Patch::cutLeftBoundary()
 {
-	int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
+    int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
+
+    if (m_left == nullptr)
+    {
+        int yEnd = -1;
+
+        if (m_top != nullptr)
+        {
+            for (int y = 0; y < overlap; y++) // Find stopping point (y) of top seam first
+            {
+                if (getBoundaries()->getPixelValueAt(0, y) == 1)
+                {
+                    yEnd = y;
+                    break;
+                }
+            }
+        }
+
+        for (int y = yEnd + 1; y < m_dimension; y++)
+        {
+            getBoundaries()->setPixelValueAt(0, y, 1);
+        }
+        return;
+    }
+
 	int startY = m_dimension - 1;
 
 	int previousCol = -1; // We keep track as we move in the Y direction where (in X) the previous column was cut at
 	// since we can only go within -1 -> +1 from that for the next cut
 
-	if (bottom != nullptr)
+	if (m_bottom != nullptr)
 	{
-		startY = m_dimension - overlap + bottom->getCornerCut()[1] - 1;
-		previousCol = bottom->getCornerCut()[0];
+		startY = m_dimension - overlap + m_bottom->getCornerCut()[1] - 1;
+		previousCol = m_bottom->getCornerCut()[0];
 	}
 
 	int endY = -1;
 
-	if (top != nullptr)
+	if (m_top != nullptr)
 	{
 		endY = getCornerCut()[1];
 	}
 
 	for (int y = startY; y >= endY + 1; y--)
 	{
-		if (y == m_dimension - 1 && bottom == nullptr) // Haven't determined starting cut yet
+		if (y == m_dimension - 1 && m_bottom == nullptr) // Haven't determined starting cut yet
 		{
 			int smallest = m_error->getPixelValueAt(0, y);
 			int index = 0;
@@ -332,6 +467,35 @@ vector<int> Patch::getCornerCut()
 }
 
 /**
+ * Interpolates the edge boundaries that have been cut to completely fill in the mask of the Patch
+ */
+void Patch::interpolateMask()
+{
+    for (int x = 0; x < m_dimension; x++)
+    {
+        int hits = 0;
+        for (int y = 0; y < m_dimension; y++)
+        {
+            if (hits == 1)
+            {
+                getBoundaries()->setPixelValueAt(x, y, 1);
+            }
+            else if (hits == 2)
+            {
+                continue;
+            }
+            else
+            {
+                if (getBoundaries()->getPixelValueAt(x, y) == 1)
+                {
+                    hits++;
+                }
+            }
+        }
+    }
+}
+
+/**
  * Calculates the least cost cut for the top left corner of this patch. Should only be called for patches that have a
  * Patch to their left
  */
@@ -357,7 +521,23 @@ void Patch::determineCorner()
 		}
 	}
 
-	m_boundaries->setPixelValueAt(indexX, indexY, 1);
+	m_boundaries->setPixelValueAt(indexX, indexY, 9);
 	m_cornerCutX = indexX;
 	m_cornerCutY = indexY;
+}
+
+/**
+ * Determines the least cost path from the given start and end points. If the endX or endY is given as -1, the algorithm
+ * assumes that no specific end point must be reached
+ *
+ * @param startX The x value of the start point
+ * @param startY The y value of the end point
+ * @param endX The x value of the end point, -1 means no end point
+ * @param endY The y value of the end point, -1 means no end point
+ *
+ * @return Vector of vectors representing the points along the path. i.e. [ [0, 1], [1, 2], [2, 1] ]
+ */
+vector<vector<int>> Patch::findBestHorizontalPath(int startX, int startY, int endX, int endY)
+{
+
 }

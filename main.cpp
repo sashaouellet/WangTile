@@ -20,8 +20,8 @@ int main() {
 
 void test4()
 {
-	BMPFile file("test.bmp");
-	Quilt quilt(file, 256, 64);
+	BMPFile file("flowerpatch.bmp");
+	Quilt quilt(file, 164, 41);
 
 	quilt.generate();
 	vector<vector<Patch*>> patches = quilt.getPatches();

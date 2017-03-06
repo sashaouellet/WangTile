@@ -85,36 +85,47 @@ void Quilt::generate()
 
 		for (int j = 0; j < patchesPerSide; j++)
 		{
-			Patch *left = j != 0 ? row[j - 1] : nullptr;
-			Patch *above = i != 0 ? m_patches[i - 1][j] : nullptr;
+			Patch* left = j != 0 ? row[j - 1] : nullptr;
+			Patch* above = i != 0 ? m_patches[i - 1][j] : nullptr;
 
 			row.push_back(getPatch(left, above));
 		}
 
         m_patches.push_back(row);
 	}
+
+    // Iterate again to assign neighbours
+    for (int i = 0; i < patchesPerSide; i++)
+    {
+        for (int j = 0; j < patchesPerSide; j++)
+        {
+            Patch* left = j != 0 ? m_patches[i][j - 1] : nullptr;
+            Patch* top = i != 0 ? m_patches[i - 1][j] : nullptr;
+            Patch* right = j != patchesPerSide - 1 ? m_patches[i][j + 1] : nullptr;
+            Patch* bottom = i != patchesPerSide - 1 ? m_patches[i + 1][j] : nullptr;
+
+            m_patches[i][j]->setNeighbours(left, right, top, bottom);
+        }
+    }
 }
 
 unsigned char* Quilt::makeSeamsAndQuilt()
 {
-	unsigned int patchesPerSide = m_dimension / m_patchSize;
+	int patchesPerSide = m_dimension / m_patchSize;
 
 	for (int i = patchesPerSide - 1; i >= 0; i--)
 	{
 		for (int j = patchesPerSide - 1; j >= 0; j--)
 		{
-			Patch* left = j != 0 ? m_patches[i][j - 1] : nullptr;
-			Patch* top = i != 0 ? m_patches[i - 1][j] : nullptr;
-			Patch* right = j != patchesPerSide - 1 ? m_patches[i][j + 1] : nullptr;
-			Patch* bottom = i != patchesPerSide - 1 ? m_patches[i + 1][j] : nullptr;
-
-			if (i == 1 && j == 1)
-			{
-				m_patches[i][j]->calculateLeastCostBoundaries(left, right, top, bottom, true);
-			}
-			else {
-				m_patches[i][j]->calculateLeastCostBoundaries(left, right, top, bottom, false);
-			}
+            if (i == 1 && j == 3)
+            {
+                cout << "i: " << i << ", j: " << j << endl;
+                m_patches[i][j]->calculateLeastCostBoundaries(true);
+            }
+            else
+            {
+                m_patches[i][j]->calculateLeastCostBoundaries(false);
+            }
 		}
 	}
 }
