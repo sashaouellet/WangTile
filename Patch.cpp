@@ -26,10 +26,6 @@ Patch::Patch(const RGBPlane& plane, int dimension)
     m_totalError = 0;
 	m_cornerCutX = 0;
 	m_cornerCutY = 0;
-    m_left = nullptr;
-    m_right = nullptr;
-    m_top = nullptr;
-    m_bottom = nullptr;
 }
 
 Patch::Patch(const Patch &patch)
@@ -41,10 +37,6 @@ Patch::Patch(const Patch &patch)
     m_totalError = 0;
 	m_cornerCutX = patch.m_cornerCutX;
 	m_cornerCutY = patch.m_cornerCutY;
-    m_left = patch.m_left;
-    m_right = patch.m_right;
-    m_top = patch.m_top;
-    m_bottom = patch.m_bottom;
 }
 
 Patch::~Patch()
@@ -52,10 +44,6 @@ Patch::~Patch()
     delete m_pixelData;
     delete m_error;
 	delete m_boundaries;
-//    delete m_left;
-//    delete m_right;
-//    delete m_top;
-//    delete m_bottom;
 }
 
 /**
@@ -87,43 +75,6 @@ IntPlane* Patch::getBoundaries() const
 	return m_boundaries;
 }
 
-Patch* Patch::getLeft()
-{
-    return m_left;
-}
-
-Patch* Patch::getRight()
-{
-    return m_right;
-}
-
-Patch* Patch::getTop()
-{
-    return m_top;
-}
-
-Patch* Patch::getBottom()
-{
-    return m_bottom;
-}
-
-/**
- * Sets the neighbours for this patch. Any of these can be nullptr so signal that there is no neighbor in that
- * position
- *
- * @param left The patch to the left
- * @param right The patch to the right
- * @param top The patch above
- * @param bottom The patch below
- */
-void Patch::setNeighbours(Patch* left, Patch* right, Patch* top, Patch* bottom)
-{
-    m_left = left;
-    m_right = right;
-    m_top = top;
-    m_bottom = bottom;
-}
-
 /**
  * Populates the error 2-dimensional array by calculating the overlap score given the 2 patches. Score is determined
  * by the L2 norm of the difference in pixel values for each channel (r, g, b) of the overlapping patches.
@@ -136,7 +87,7 @@ void Patch::setNeighbours(Patch* left, Patch* right, Patch* top, Patch* bottom)
  * @param top The patch above this patch, nullptr if this is the topmost row
  * @return The total error of the overlap region
  */
-int Patch::getOverlapScore(Patch *left, Patch *top)
+int Patch::getOverlapScore(Patch* left, Patch* top)
 {
     int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
 
@@ -208,119 +159,64 @@ int Patch::getDimension()
 /**
  * Calculates the cut that needs to be made through this patch's pixels in order to produce the smallest margin of error
  * when quilting it in relation to the provided left and top patches
+ *
+ * @param left The patch to the left of this one, nullptr if it is the leftmost one in its row
+ * @param top The patch above this one, nullptr if it is the first row
  */
-void Patch::calculateLeastCostBoundaries(bool print)
+void Patch::calculateLeastCostBoundaries(Patch* left, Patch* top)
 {
 	m_boundaries->fill(0);
 
-	cutTopBoundary();
-	cutLeftBoundary();
+	cutTopBoundary(top);
+	cutLeftBoundary(left);
 
-    int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
+	vector<int> corner = findCorner();
 
-//	if (m_bottom != nullptr)
-//    {
-//        // Use bottom top cut for this patch's bottom boundary cut
-//        int startX = m_left != nullptr? m_bottom->getCornerCut()[0] + 1 : 0;
-//        int endX = m_bottom->getRight() != nullptr ? m_bottom->getRight()->getCornerCut()[0] : m_dimension;
-//
-//        int startY = m_dimension - overlap;
-//        int endY = m_dimension;
-//
-//        for (int x = startX; x < endX; x++)
-//        {
-//            for (int y = startY; y < endY; y++)
-//            {
-//                if (m_bottom->getBoundaries()->getPixelValueAt(x, y - (m_dimension - overlap)) == 1)
-//                {
-//                    getBoundaries()->setPixelValueAt(x, y - 1, 1);
-//                }
-//            }
-//        }
-//    }
-//
-//    if (m_right != nullptr)
-//    {
-//        // Use right left cut for this patch's right boundary cut
-//        int startY = m_top != nullptr ? m_right->getCornerCut()[1] + 1 : 0;
-//        int endY = m_right->getBottom() != nullptr ? m_right->getBottom()->getCornerCut()[1] : m_dimension;
-//
-//        int startX = m_dimension - overlap;
-//        int endX = m_dimension;
-//
-//        for (int y = startY; y < endY; y++)
-//        {
-//            for (int x = startX; x < endX; x++)
-//            {
-//                if (m_right->getBoundaries()->getPixelValueAt(x - (m_dimension - overlap), y) == 1)
-//                {
-//                    getBoundaries()->setPixelValueAt(x - 1, y, 1);
-//                }
-//            }
-//        }
-//    }
+	for (int i = 0; i < m_dimension; i++)
+	{
+		for (int j = 0; j < m_dimension; j++)
+		{
+			if (i < corner[1] && j < corner[0])
+			{
+				m_boundaries->setPixelValueAt(j, i, 3);
+			}
+			else if (m_boundaries->getPixelValueAt(j, i) == 0)
+			{
+				m_boundaries->setPixelValueAt(j, i, 1);
+			}
+		}
+	}
 
-//    interpolateMask();
-
-    if (print)
-    {
-        m_boundaries->print();
-        cout << endl;
-    }
+	getBoundaries()->print();
 }
 
 /**
- * Makes the cut along the top overlap region
+ * Makes the cut along the top overlap region, given the Patch above this one
+ *
+ * @param top The patch above this one, nullptr if it is the first row. In that case, no top boundary should be drawn
+ * 		      since there is no overlap. The cut is then just the entire top row of pixels.
  */
-void Patch::cutTopBoundary()
+void Patch::cutTopBoundary(Patch* top)
 {
     int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
 
-    if (m_top == nullptr)
+    if (top == nullptr) // No patch above, therefore there is no overlap
     {
-        int xEnd = -1;
-
-        if (m_left != nullptr)
+        for (int x = 0; x < m_dimension; x++)
         {
-            for (int x = 0; x < overlap; x++) // Find stopping point (x) of left seam first
-            {
-                if (getBoundaries()->getPixelValueAt(x, 0) == 1)
-                {
-                    xEnd = x;
-                    break;
-                }
-            }
-        }
-
-        for (int x = xEnd + 1; x < m_dimension; x++)
-        {
-            getBoundaries()->setPixelValueAt(x, 0, 1);
+            getBoundaries()->setPixelValueAt(x, 0, m_boundaries->getPixelValueAt(x, 0) + 1);
         }
         return;
     }
 
-	int startX = m_dimension - 1;
+	// Otherwise we have to calculate the cut through the overlap
 
 	int previousRow = -1; // We keep track as we move in the X direction where (in Y) the previous column was cut at
 	// since we can only go within -1 -> +1 from that for the next cut
 
-	if (m_right != nullptr)
+	for (int x = m_dimension - 1; x >= 0; x--)
 	{
-		startX = m_dimension - overlap + m_right->getCornerCut()[0] - 1;
-		previousRow = m_right->getCornerCut()[1];
-	}
-
-	int endX = -1;
-
-	if (m_left != nullptr)
-	{
-		determineCorner();
-		endX = getCornerCut()[0];
-	}
-
-	for (int x = startX; x >= endX + 1; x--)
-	{
-		if (x == m_dimension - 1 && m_right == nullptr) // Haven't determined a starting cut yet
+		if (previousRow == -1) // Haven't determined a starting cut yet
 		{
 			int smallest = m_error->getPixelValueAt(x, 0);
 			int index = 0;
@@ -336,7 +232,7 @@ void Patch::cutTopBoundary()
 				}
 			}
 			previousRow = index;
-			m_boundaries->setPixelValueAt(x, previousRow, 1);
+			m_boundaries->setPixelValueAt(x, previousRow, m_boundaries->getPixelValueAt(x, previousRow) + 1);
 		}
 		else // Now we can only iterate from -1 to +1 of previousRow
 		{
@@ -356,62 +252,46 @@ void Patch::cutTopBoundary()
 				}
 			}
 			previousRow = index;
-			m_boundaries->setPixelValueAt(x, previousRow, 1);
+			m_boundaries->setPixelValueAt(x, previousRow, m_boundaries->getPixelValueAt(x, previousRow) + 1);
+		}
+
+		if (previousRow != 0)
+		{
+			for (int i = previousRow - 1; i >= 0; i--)
+			{
+				m_boundaries->setPixelValueAt(x, i, 3);
+			}
 		}
 	}
 }
 
 /**
- * Makes the cut along the left overlap region
+ * Makes the cut along the left overlap region, given the Patch to the left of this one
+ *
+ * @param left The patch to the left of this one, nullptr if this is the leftmost one. In that case, no actual cut
+ *             will be made since there is no overlap region. The cut is therefore only the leftmost column of pixels
  */
-void Patch::cutLeftBoundary()
+void Patch::cutLeftBoundary(Patch* left)
 {
     int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
 
-    if (m_left == nullptr)
+    if (left == nullptr) // No overlap, only make left column the "cut"
     {
-        int yEnd = -1;
-
-        if (m_top != nullptr)
+        for (int y = 0; y < m_dimension; y++)
         {
-            for (int y = 0; y < overlap; y++) // Find stopping point (y) of top seam first
-            {
-                if (getBoundaries()->getPixelValueAt(0, y) == 1)
-                {
-                    yEnd = y;
-                    break;
-                }
-            }
-        }
-
-        for (int y = yEnd + 1; y < m_dimension; y++)
-        {
-            getBoundaries()->setPixelValueAt(0, y, 1);
+            getBoundaries()->setPixelValueAt(0, y, m_boundaries->getPixelValueAt(0, y) + 1);
         }
         return;
     }
 
-	int startY = m_dimension - 1;
+	// Otherwise we have to calculate the least cost cut through the left overlap surface
 
 	int previousCol = -1; // We keep track as we move in the Y direction where (in X) the previous column was cut at
 	// since we can only go within -1 -> +1 from that for the next cut
 
-	if (m_bottom != nullptr)
+	for (int y = m_dimension - 1; y >= 0; y--)
 	{
-		startY = m_dimension - overlap + m_bottom->getCornerCut()[1] - 1;
-		previousCol = m_bottom->getCornerCut()[0];
-	}
-
-	int endY = -1;
-
-	if (m_top != nullptr)
-	{
-		endY = getCornerCut()[1];
-	}
-
-	for (int y = startY; y >= endY + 1; y--)
-	{
-		if (y == m_dimension - 1 && m_bottom == nullptr) // Haven't determined starting cut yet
+		if (previousCol == -1) // Haven't determined starting cut yet
 		{
 			int smallest = m_error->getPixelValueAt(0, y);
 			int index = 0;
@@ -427,7 +307,7 @@ void Patch::cutLeftBoundary()
 				}
 			}
 			previousCol = index;
-			m_boundaries->setPixelValueAt(previousCol, y, 1);
+			m_boundaries->setPixelValueAt(previousCol, y, m_boundaries->getPixelValueAt(previousCol, y) + 1);
 		}
 		else // Now we can only iterate from -1 to +1 of previousCol
 		{
@@ -447,97 +327,38 @@ void Patch::cutLeftBoundary()
 				}
 			}
 			previousCol = index;
-			m_boundaries->setPixelValueAt(previousCol, y, 1);
+			m_boundaries->setPixelValueAt(previousCol, y, m_boundaries->getPixelValueAt(previousCol, y) + 1);
+		}
+
+		if (previousCol != 0)
+		{
+			for (int i = previousCol - 1; i >= 0; i--)
+			{
+				m_boundaries->setPixelValueAt(i, y, 3);
+			}
 		}
 	}
 }
 
 /**
- * Gets the point of the corner cut of this patch. This is where the quilting seam starts on the L overlap region
- * @return Size 2 vector with the coordinates of the corner cut
+ * Finds the corner of the boundary cuts
+ *
+ * @return A size 2 vector containing the x, y coords of the corner of the boundary cuts
  */
-vector<int> Patch::getCornerCut()
+vector<int> Patch::findCorner()
 {
 	vector<int> point(2);
-
-	point[0] = m_cornerCutX;
-	point[1] = m_cornerCutY;
-
-	return point;
-}
-
-/**
- * Interpolates the edge boundaries that have been cut to completely fill in the mask of the Patch
- */
-void Patch::interpolateMask()
-{
-    for (int x = 0; x < m_dimension; x++)
-    {
-        int hits = 0;
-        for (int y = 0; y < m_dimension; y++)
-        {
-            if (hits == 1)
-            {
-                getBoundaries()->setPixelValueAt(x, y, 1);
-            }
-            else if (hits == 2)
-            {
-                continue;
-            }
-            else
-            {
-                if (getBoundaries()->getPixelValueAt(x, y) == 1)
-                {
-                    hits++;
-                }
-            }
-        }
-    }
-}
-
-/**
- * Calculates the least cost cut for the top left corner of this patch. Should only be called for patches that have a
- * Patch to their left
- */
-void Patch::determineCorner()
-{
-	int smallest = INT_MAX;
-	int indexX = 0;
-	int indexY = 0;
-	int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
-
-	for (int y = 0; y < overlap; y++)
+	for (int i = 0; i < m_dimension; i++)
 	{
-		for (int x = 0; x < overlap; x++)
+		for (int j = 0; j < m_dimension; j++)
 		{
-			int error = m_error->getPixelValueAt(x, y);
-
-			if (error < smallest)
+			if (m_boundaries->getPixelValueAt(j, i) == 2)
 			{
-				smallest = error;
-				indexX = x;
-				indexY = y;
+				point[0] = j;
+				point[1] = i;
 			}
 		}
 	}
 
-	m_boundaries->setPixelValueAt(indexX, indexY, 9);
-	m_cornerCutX = indexX;
-	m_cornerCutY = indexY;
-}
-
-/**
- * Determines the least cost path from the given start and end points. If the endX or endY is given as -1, the algorithm
- * assumes that no specific end point must be reached
- *
- * @param startX The x value of the start point
- * @param startY The y value of the end point
- * @param endX The x value of the end point, -1 means no end point
- * @param endY The y value of the end point, -1 means no end point
- *
- * @return Vector of vectors representing the points along the path. i.e. [ [0, 1], [1, 2], [2, 1] ]
- */
-vector<vector<int>> Patch::findBestHorizontalPath(int startX, int startY, int endX, int endY)
-{
-
+	return point;
 }

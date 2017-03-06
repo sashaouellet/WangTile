@@ -19,10 +19,6 @@ private:
     RGBPlane* m_pixelData;
     IntPlane* m_error;
 	IntPlane* m_boundaries;
-    Patch* m_left;
-    Patch* m_right;
-    Patch* m_top;
-    Patch* m_bottom;
     int m_dimension;
     int m_totalError;
 	int m_cornerCutX;
@@ -34,24 +30,18 @@ public:
     RGBPlane* getRGBPlane() const;
     IntPlane* getErrorPlane() const;
 	IntPlane* getBoundaries() const;
-    Patch* getLeft();
-    Patch* getRight();
-    Patch* getTop();
-    Patch* getBottom();
-    void setNeighbours(Patch*, Patch*, Patch*, Patch*);
     int getOverlapScore(Patch*, Patch*);
     int getDimension();
     int* getPixelAt(int, int);
     int getTotalError();
-    void calculateLeastCostBoundaries(bool);
-	void cutTopBoundary();
-	void cutLeftBoundary();
-	vector<int> getCornerCut();
-	void determineCorner();
-    void interpolateMask();
-    vector<vector<int>> findBestHorizontalPath(int, int, int, int);
+    void calculateLeastCostBoundaries(Patch*, Patch*);
 
-    virtual ~Patch();
+	virtual ~Patch();
+
+private:
+	void cutTopBoundary(Patch*);
+	void cutLeftBoundary(Patch*);
+	vector<int> findCorner();
 };
 
 #endif //WANGTILE_PATCH_H
