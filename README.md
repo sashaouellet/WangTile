@@ -40,3 +40,13 @@ This is the input image that patches are extracted from. The images below show t
  ![LargeFormat](imageQuilt_500.bmp)
  
  500x500 output using Method 2
+ 
+![Input Texture2](input2.bmp)
+
+With a 256px input image (above), we can produce the output quilted images below with patch sizes of 16, 32, and 64px respectively.
+
+![16](imageQuilt_patch16.bmp)
+
+![32](imageQuilt_patch32.bmp)
+ 
+ ![64](imageQuilt_patch64.bmp)
