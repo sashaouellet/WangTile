@@ -11,23 +11,32 @@ void test1();
 void test2();
 void test3();
 void test4();
+void test5();
 
 int main() {
-    test4();
+    test5();
 
     return 0;
 }
 
+void test5()
+{
+	BMPFile file("/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/flowerpatch.bmp");
+
+	Patch* red =
+}
+
 void test4()
 {
-	BMPFile file("D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\flowerpatch.bmp");
-	Quilt quilt(file, 4, 41);
+//	BMPFile file("D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\flowerpatch.bmp");
+	BMPFile file("/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/input2.bmp");
+	Quilt quilt(file, 10, 64);
 
 	quilt.generate();
 
 	RGBPlane* output = quilt.makeSeamsAndQuilt();
 
-    BMPFile::writeFile(quilt.getDimension(), quilt.getDimension(), output->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\imageQuilt.bmp");
+    BMPFile::writeFile(quilt.getDimension(), quilt.getDimension(), output->getRawData(), "/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/imageQuilt_patch64.bmp");
 }
 
 // Quilt patch extraction test

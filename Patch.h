@@ -23,9 +23,10 @@ private:
     int m_totalError;
 	int m_cornerCutX;
 	int m_cornerCutY;
+	char m_code;
 
 public:
-    Patch(const RGBPlane&, int);
+    Patch(const RGBPlane&, int, char);
     Patch(const Patch&);
     RGBPlane* getRGBPlane() const;
     IntPlane* getErrorPlane() const;
@@ -37,6 +38,11 @@ public:
     void calculateLeastCostBoundaries(Patch*, Patch*);
 
 	virtual ~Patch();
+
+	static const char CODE_R = 'r';
+	static const char CODE_B = 'b';
+	static const char CODE_G = 'g';
+	static const char CODE_Y = 'y';
 
 private:
 	void cutTopBoundary(Patch*);

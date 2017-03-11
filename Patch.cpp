@@ -17,7 +17,7 @@
  *             of the original input image
  * @param dimension The length of the Patch edges
  */
-Patch::Patch(const RGBPlane& plane, int dimension)
+Patch::Patch(const RGBPlane& plane, int dimension, char code)
 {
     m_pixelData = new RGBPlane(plane);
     m_dimension = dimension;
@@ -26,6 +26,7 @@ Patch::Patch(const RGBPlane& plane, int dimension)
     m_totalError = 0;
 	m_cornerCutX = 0;
 	m_cornerCutY = 0;
+	m_code = code;
 }
 
 Patch::Patch(const Patch &patch)
@@ -37,6 +38,7 @@ Patch::Patch(const Patch &patch)
     m_totalError = 0;
 	m_cornerCutX = patch.m_cornerCutX;
 	m_cornerCutY = patch.m_cornerCutY;
+	m_code = patch.m_code;
 }
 
 Patch::~Patch()

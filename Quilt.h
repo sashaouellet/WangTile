@@ -30,6 +30,7 @@ private:
     default_random_engine m_generator;
 
     void extractPatches();
+	void layoutPatches(vector<Patch*>);
     void setOutputPixel(Patch*, int, int, int, int);
 
 public:
@@ -37,12 +38,15 @@ public:
     constexpr static double BEST_FIT_MARGIN = 1.1;
 
     Quilt(BMPFile&, int, int);
+	Quilt(BMPFile&, int, vector<Patch*>);
     void generate();
     Patch* getPatch(Patch*, Patch*);
 	Patch* getRandom(vector<Patch*>&, bool);
     int getDimension();
 	RGBPlane* makeSeamsAndQuilt();
     vector<vector<Patch*>> getPatches();
+
+	const Patch* getPatchFromSourceAt(int, int, int, int, char);
 
     virtual ~Quilt();
 };

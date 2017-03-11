@@ -39,6 +39,28 @@ Quilt::Quilt(BMPFile& source, int patchesPerSide, int patchSize)
     extractPatches();
 }
 
+/**
+ * Creates a quilt from a predetermined arrangement of patches
+ *
+ * @param source Where this quilt's patches were extracted from
+ * @param patchesPerSide The number of patches per side in order to determine the 2D grid layout
+ * @param patches The patch list that this quilt is composed from
+ */
+Quilt::Quilt(BMPFile& source, int patchesPerSide, vector<Patch*> patches)
+ : m_source(source) {
+	Patch* p = patches[0];
+	int patchSize = p->getDimension();
+	int overlap = patchSize / Quilt::OVERLAP_DIVISOR;
+
+	m_dimension = (patchesPerSide * patchSize) - ((patchesPerSide - 1) * overlap);
+	m_patchesPerSide = patchesPerSide;
+	m_patchSize = patchSize;
+	m_generator = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
+	m_output = new RGBPlane(m_dimension, m_dimension);
+
+	layoutPatches(patches);
+}
+
 Quilt::~Quilt()
 {
 //    vector<Patch*>::iterator it;
@@ -76,9 +98,37 @@ void Quilt::extractPatches()
         for (int j = 0 ; j < patchesPerSide ; j++)
         {
             int colLower = j * m_patchSize;
-            m_patchSet.push_back(new Patch(m_source.getPlane()->getRegion(colLower, rowLower, colLower + m_patchSize - 1, rowLower + m_patchSize - 1, true), m_patchSize));
+            m_patchSet.push_back(Quilt::getPatchFromSourceAt(colLower, rowLower, colLower + m_patchSize - 1, rowLower + m_patchSize - 1, NULL));
         }
     }
+}
+
+const Patch* Quilt::getPatchFromSourceAt(int x1, int y1, int x2, int y2, char code)
+{
+	return new Patch(m_source.getPlane()->getRegion(x1, y1, x2, y2, true), m_patchSize, code);
+}
+
+/**
+ * Lays out the given patches according to the already defined number of patches per side in this Quilt
+ *
+ * @param patches The patches to layout
+ */
+void Quilt::layoutPatches(vector<Patch*> patches)
+{
+	int index = 0;
+
+	for (int i = 0; i < m_patchesPerSide; i++)
+	{
+		vector<Patch*> row;
+
+		for (int j = 0; j < m_patchesPerSide; j++)
+		{
+
+			row.push_back(patches[index++]);
+		}
+
+		m_patches.push_back(row);
+	}
 }
 
 void Quilt::generate()
@@ -144,7 +194,7 @@ void Quilt::setOutputPixel(Patch* patch, int patchPosX, int patchPosY, int x, in
 
     if (mask)
     {
-        m_output->setPixelValueAt(quiltX, quiltY, (unsigned char) pixel[0], (unsigned char) pixel[1], (unsigned char) pixel[2], true);
+        m_output->setPixelValueAt(quiltX, quiltY, (unsigned char) pixel[0], (unsigned char) pixel[1], (unsigned char) pixel[2], false);
     }
 }
 
