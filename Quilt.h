@@ -12,6 +12,7 @@
 
 #include "BMPFile.h"
 #include "Patch.h"
+#include "Tile.h"
 #include <vector>
 #include <random>
 
@@ -45,8 +46,11 @@ public:
     int getDimension();
 	RGBPlane* makeSeamsAndQuilt();
     vector<vector<Patch*>> getPatches();
+    RGBPlane* getOutput();
+    Tile* getTile();
 
-	const Patch* getPatchFromSourceAt(int, int, int, int, char);
+	Patch* getPatchFromSourceAt(int, int, int, int, char);
+    static Patch* getPatchFromSourceAt(BMPFile&, int, int, int, int, int, char);
 
     virtual ~Quilt();
 };

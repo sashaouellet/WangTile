@@ -34,6 +34,7 @@ public:
     void placeTile(Tile&, int, int, unsigned char*);
     int getPixelWidth();
     int getPixelHeight();
+	Tile getTileAt(int, int);
 	//TODO: addTile to original tile set method
 };
 

@@ -7,6 +7,7 @@
 
 #include <stdexcept>
 #include <iostream>
+#include <cmath>
 #include "RGBPlane.h"
 
 using namespace std;
@@ -139,11 +140,11 @@ unsigned char RGBPlane::getValueAt(int ind)
  * @param flip If the y values should be flipped to accommodate retrieving data from a bitmap structure
  * @return A new subset region plane from the given region
  */
-RGBPlane RGBPlane::getRegion(int x1, int y1, int x2, int y2, bool flip)
+RGBPlane* RGBPlane::getRegion(int x1, int y1, int x2, int y2, bool flip)
 {
     int width = x2 - x1 + 1;
     int height = y2 - y1 + 1;
-    RGBPlane region(width, height);
+    RGBPlane* region = new RGBPlane(width, height);
 
     for (int i = y1, y = 0 ; i <= y2 ; i++, y++)
     {
@@ -151,7 +152,7 @@ RGBPlane RGBPlane::getRegion(int x1, int y1, int x2, int y2, bool flip)
         {
             vector<unsigned char> data = getPixelValueAt(j, i, flip);
 
-            region.setPixelValueAt(x, y, data[0], data[1], data[2], flip);
+            region->setPixelValueAt(x, y, data[0], data[1], data[2], flip);
         }
     }
 
@@ -211,4 +212,60 @@ int RGBPlane::getHeight() const
 unsigned char* RGBPlane::getRawData()
 {
     return m_pixelData;
+}
+
+/**
+ * Rotates the plane 45 degrees, effectively resizing to account for the increase in the bouding box size and remapping all
+ * the pixel data
+ */
+RGBPlane* RGBPlane::rotate()
+{
+    float angle = -45 * (3.141592/180.0f);
+    float midX = ((float)m_width) / 2.0f;
+    float midY = ((float)m_height) / 2.0f;
+
+    float sine = sin(angle);
+    float cosine = cos(angle);
+
+    // x = x cos - y sin
+    float topLeftTransformedX = (-midX * cosine) - (midY * sine);
+    float topRightTransformedX = (midX * cosine) - (midY * sine);
+    float bottomLeftTransformedX  = (-midX * cosine) - (-midY * sine);
+    float bottomRightTransformedX = (midX * cosine) - (-midY * sine);
+
+    float minx = min(topLeftTransformedX, min(topRightTransformedX, min(bottomLeftTransformedX, bottomRightTransformedX)));
+    float maxx = max(topLeftTransformedX, max(topRightTransformedX, max(bottomLeftTransformedX, bottomRightTransformedX)));
+
+    // y = x sin + y cos
+    float topLeftTransformedY = (-midX * sine) + (midY * cosine);
+    float topRightTransformedY = (midX * sine) + (midY * cosine);
+    float bottomLeftTransformedY  = (-midX * sine) + (-midY * cosine);
+    float bottomRightTransformedY = (midX * sine) + (-midY * cosine);
+
+    float miny = min(topLeftTransformedY, min(topRightTransformedY, min(bottomLeftTransformedY, bottomRightTransformedY)));
+    float maxy = max(topLeftTransformedY, max(topRightTransformedY, max(bottomLeftTransformedY, bottomRightTransformedY)));
+
+    int outWidth = (int) ceil(fabs(maxx) + fabs(minx));
+    int outHeight = (int) ceil(fabs(maxy) + fabs(miny));
+
+    RGBPlane* newPlane = new RGBPlane(outWidth, outHeight);
+
+    for (int x = 0; x < outWidth; x++)
+    {
+        for (int y = 0; y < outHeight; y++)
+        {
+            float error = 0.858; // I'm not sure why I need this but the transform is slightly off without it
+            float srcX = ((cosine * (x - midX)) - (sine * (y - midY))) + (midX / 2) * error;
+            float srcY = ((sine * (x - midX)) + (cosine * (y - midY))) + midY;
+
+            if (srcX >= 0 && srcX < m_width && srcY >= 0 && srcY < m_height)
+            {
+                vector<unsigned char> pixel = getPixelValueAt(srcX, srcY, true);
+
+                newPlane->setPixelValueAt(x, y, pixel[0], pixel[1], pixel[2], true);
+            }
+        }
+    }
+
+    return newPlane;
 }

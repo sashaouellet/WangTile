@@ -34,6 +34,8 @@ public:
     bool hasCodeAtSide(char, int);
     void print();
     BMPFile& getImage();
+	int getDimension();
+    bool isSame(Tile*);
 };
 
 

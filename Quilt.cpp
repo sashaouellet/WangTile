@@ -98,14 +98,19 @@ void Quilt::extractPatches()
         for (int j = 0 ; j < patchesPerSide ; j++)
         {
             int colLower = j * m_patchSize;
-            m_patchSet.push_back(Quilt::getPatchFromSourceAt(colLower, rowLower, colLower + m_patchSize - 1, rowLower + m_patchSize - 1, NULL));
+            m_patchSet.push_back(Quilt::getPatchFromSourceAt(colLower, rowLower, colLower + m_patchSize - 1, rowLower + m_patchSize - 1, 0));
         }
     }
 }
 
-const Patch* Quilt::getPatchFromSourceAt(int x1, int y1, int x2, int y2, char code)
+Patch* Quilt::getPatchFromSourceAt(int x1, int y1, int x2, int y2, char code)
 {
-	return new Patch(m_source.getPlane()->getRegion(x1, y1, x2, y2, true), m_patchSize, code);
+	return new Patch(*m_source.getPlane()->getRegion(x1, y1, x2, y2, true), m_patchSize, code);
+}
+
+Patch* Quilt::getPatchFromSourceAt(BMPFile& source, int patchSize, int x1, int y1, int x2, int y2, char code)
+{
+    return new Patch(*source.getPlane()->getRegion(x1, y1, x2, y2, false), patchSize, code);
 }
 
 /**
@@ -123,8 +128,12 @@ void Quilt::layoutPatches(vector<Patch*> patches)
 
 		for (int j = 0; j < m_patchesPerSide; j++)
 		{
+            Patch* p = patches[index++];
+            Patch* left = j != 0 ? patches[(i * m_patchesPerSide) + (j - 1)] : nullptr;
+            Patch* top = i != 0 ? patches[((i - 1) * m_patchesPerSide) + j] : nullptr;
 
-			row.push_back(patches[index++]);
+            p->getOverlapScore(left, top);
+			row.push_back(p);
 		}
 
 		m_patches.push_back(row);
@@ -273,6 +282,16 @@ Patch* Quilt::getRandom(vector<Patch*> &patches, bool del)
 }
 
 /**
+ * Gets the output RGBPlane generated after the seam process has been completed
+ *
+ * @return The output of the seam process
+ */
+RGBPlane* Quilt::getOutput()
+{
+    return m_output;
+}
+
+/**
  * Gets the dimension of the quilt (side length)
  *
  * @return The size, in pixels, of of the Quilt edges
@@ -285,4 +304,26 @@ int Quilt::getDimension()
 vector<vector<Patch*>> Quilt::getPatches()
 {
     return m_patches;
+}
+
+/**
+ * Gets the tile from the rotated center of this quilt, with the coded edges taken from the codes of each of the patches
+ * this Quilt is composed from
+ *
+ * @return The tile from this Quilt's center
+ */
+Tile* Quilt::getTile()
+{
+    RGBPlane* tilePlane = getOutput()->rotate();
+
+    vector<char> codes = {m_patches[0][0]->getCode(), m_patches[0][1]->getCode(), m_patches[1][1]->getCode(), m_patches[1][0]->getCode()};
+
+    int offset = tilePlane->getWidth() / 4 + 6;
+    int width = (tilePlane->getWidth() / 2) - 12;
+
+    RGBPlane* region = tilePlane->getRegion(offset, offset, offset + width, offset + width, true);
+
+    BMPFile file = BMPFile(*region);
+
+    return new Tile(file, codes);
 }

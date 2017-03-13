@@ -36,6 +36,9 @@ public:
     int* getPixelAt(int, int);
     int getTotalError();
     void calculateLeastCostBoundaries(Patch*, Patch*);
+    vector<int*> getVerticalCut();
+    vector<int*> getHorizontalCut();
+	char getCode();
 
 	virtual ~Patch();
 

@@ -101,7 +101,7 @@ void BMPFile::writeFile(int width, int height, unsigned char* pixelData, const c
 
 	unsigned char bmpfileheader[14] = { 'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0 };
 	unsigned char bmpinfoheader[40] = { 40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0 };
-	unsigned char bmppad[3] = { 0,0,0 };
+	unsigned char bmppad[3] = {0, 0, 0};
 
 	bmpfileheader[2]  = (unsigned char)(fileSize);
 	bmpfileheader[3]  = (unsigned char)(fileSize >> 8);
@@ -119,11 +119,15 @@ void BMPFile::writeFile(int width, int height, unsigned char* pixelData, const c
 
 	int size = 3 * width * height;
 
+    unsigned char* outData = new unsigned char[size];
+
+    copy(pixelData, pixelData + size, outData);
+
 	for (int i = 0; i < size; i += 3) // Flip R and B back
 	{
-		unsigned char tmp = pixelData[i];
-		pixelData[i] = pixelData[i + 2];
-		pixelData[i + 2] = tmp;
+		unsigned char tmp = outData[i];
+        outData[i] = outData[i + 2];
+        outData[i + 2] = tmp;
 	}
 
 	FILE *f;
@@ -132,10 +136,12 @@ void BMPFile::writeFile(int width, int height, unsigned char* pixelData, const c
 	fwrite(bmpinfoheader, 1, 40, f);
 	for (int i = 0; i < height; i++)
 	{
-		fwrite(pixelData + (width * (i) * 3), 3, width, f);
+		fwrite(outData + (width * (i) * 3), 3, width, f);
 		fwrite(bmppad, 1, (4 - (width * 3) % 4) % 4, f);
 	}
 	fclose(f);
+
+    delete [] outData;
 }
 
 /**

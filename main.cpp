@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <limits.h>
 #include "BMPFile.h"
 #include "Tile.h"
 #include "TileMap.h"
@@ -7,116 +8,104 @@
 
 using namespace std;
 
-void test1();
-void test2();
-void test3();
-void test4();
-void test5();
+void makeQuiltedImage();
+void makeWangTiles();
 
 int main() {
-    test5();
+//    makeWangTiles();
+    makeQuiltedImage();
 
     return 0;
 }
 
-void test5()
+void makeWangTiles()
 {
-	BMPFile file("/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/flowerpatch.bmp");
+	BMPFile file("D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\input2.bmp");
+    int dim = file.getWidth() / 2;
 
-	Patch* red =
+	Patch* red = Quilt::getPatchFromSourceAt(file, dim, 0, 0, dim - 1, dim - 1, Patch::CODE_R);
+	Patch* yellow = Quilt::getPatchFromSourceAt(file, dim, dim, 0, (dim * 2) - 1, dim - 1, Patch::CODE_Y);
+	Patch* blue = Quilt::getPatchFromSourceAt(file, dim, 0, dim, dim - 1, (dim * 2) - 1, Patch::CODE_B);
+	Patch* green = Quilt::getPatchFromSourceAt(file, dim, dim, dim, (dim * 2) - 1, (dim * 2) - 1, Patch::CODE_G);
+
+    vector<Patch*> l1 = {red, yellow, blue, green};
+    Quilt q1(file, 2, l1);
+    q1.makeSeamsAndQuilt();
+
+    vector<Patch*> l2 = {green, blue, blue, green};
+    Quilt q2(file, 2, l2);
+    q2.makeSeamsAndQuilt();
+
+    vector<Patch*> l3 = {red, yellow, yellow, red};
+    Quilt q3(file, 2, l3);
+    q3.makeSeamsAndQuilt();
+
+    vector<Patch*> l4 = {green, blue, yellow, red};
+    Quilt q4(file, 2, l4);
+    q4.makeSeamsAndQuilt();
+
+    vector<Patch*> l5 = {red, blue, yellow, green};
+    Quilt q5(file, 2, l5);
+    q5.makeSeamsAndQuilt();
+
+    vector<Patch*> l6 = {green, yellow, yellow, green};
+    Quilt q6(file, 2, l6);
+    q6.makeSeamsAndQuilt();
+
+    vector<Patch*> l7 = {red, blue, blue, red};
+    Quilt q7(file, 2, l7);
+    q7.makeSeamsAndQuilt();
+
+    vector<Patch*> l8 = {green, yellow, blue, red};
+    Quilt q8(file, 2, l8);
+    q8.makeSeamsAndQuilt();
+
+    BMPFile::writeFile(q1.getDimension(), q1.getDimension(), q1.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt1.bmp");
+    BMPFile::writeFile(q2.getDimension(), q2.getDimension(), q2.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt2.bmp");
+    BMPFile::writeFile(q3.getDimension(), q3.getDimension(), q3.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt3.bmp");
+    BMPFile::writeFile(q4.getDimension(), q4.getDimension(), q4.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt4.bmp");
+    BMPFile::writeFile(q5.getDimension(), q5.getDimension(), q5.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt5.bmp");
+    BMPFile::writeFile(q6.getDimension(), q6.getDimension(), q6.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt6.bmp");
+    BMPFile::writeFile(q7.getDimension(), q7.getDimension(), q7.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt7.bmp");
+    BMPFile::writeFile(q8.getDimension(), q8.getDimension(), q8.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt8.bmp");
+
+    Tile* t1 = q1.getTile();
+    Tile* t2 = q2.getTile();
+    Tile* t3 = q3.getTile();
+    Tile* t4 = q4.getTile();
+    Tile* t5 = q5.getTile();
+    Tile* t6 = q6.getTile();
+    Tile* t7 = q7.getTile();
+    Tile* t8 = q8.getTile();
+
+    BMPFile::writeFile(t1->getDimension(), t1->getDimension(), t1->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile1.bmp");
+    BMPFile::writeFile(t2->getDimension(), t2->getDimension(), t2->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile2.bmp");
+    BMPFile::writeFile(t3->getDimension(), t3->getDimension(), t3->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile3.bmp");
+    BMPFile::writeFile(t4->getDimension(), t4->getDimension(), t4->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile4.bmp");
+    BMPFile::writeFile(t5->getDimension(), t5->getDimension(), t5->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile5.bmp");
+    BMPFile::writeFile(t6->getDimension(), t6->getDimension(), t6->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile6.bmp");
+    BMPFile::writeFile(t7->getDimension(), t7->getDimension(), t7->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile7.bmp");
+    BMPFile::writeFile(t8->getDimension(), t8->getDimension(), t8->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile8.bmp");
+
+    vector<Tile> tiles = {*t1, *t2, *t3, *t4, *t5, *t6, *t7, *t8};
+
+    TileMap map(tiles, 5, 5);
+
+    map.generate();
+    map.print();
+
+    BMPFile::writeFile(map.getPixelWidth(), map.getPixelHeight(), map.makeArray(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\patchTileMapTEST5.bmp");
 }
 
-void test4()
+void makeQuiltedImage()
 {
-//	BMPFile file("D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\flowerpatch.bmp");
-	BMPFile file("/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/input2.bmp");
-	Quilt quilt(file, 10, 64);
+	BMPFile file("D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\grass.bmp");
+//	BMPFile file("/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/input2.bmp");
+	Quilt quilt(file, 30, 32);
 
 	quilt.generate();
 
 	RGBPlane* output = quilt.makeSeamsAndQuilt();
 
-    BMPFile::writeFile(quilt.getDimension(), quilt.getDimension(), output->getRawData(), "/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/imageQuilt_patch64.bmp");
-}
-
-// Quilt patch extraction test
-void test3()
-{
-    BMPFile file("test.bmp");
-    Quilt quilt(file, 256, 64);
-
-    quilt.generate();
-    vector<vector<Patch*>> patches = quilt.getPatches();
-    vector<vector<Tile>> tiles;
-    tiles.resize(patches.size());
-
-	for (int i = 0 ; i < patches.size() ; i++)
-	{
-		for (int j = 0 ; j < patches[i].size() ; j++)
-		{
-            vector<char> c = {'a', 'b', 'c', 'd'};
-            Tile t(*new BMPFile(*(patches[i][j]->getRGBPlane())), c);
-			tiles[i].push_back(t);
-		}
-	}
-
-    TileMap map(tiles, 4, 4);
-    unsigned char *data = map.makeArray();
-
-    BMPFile::writeFile(256, 256, data, "testPatches.bmp");
-}
-
-// Region extraction and output test
-void test2()
-{
-    BMPFile test("flowerpatch.bmp");
-
-    BMPFile::writeFile(41, 41, test.getPlane()->getRegion(0, 0, 40, 40, true).getRawData(), "region.bmp");
-}
-
-// Tiling algorithm test
-void test1()
-{
-    BMPFile tile1("tile_GBGB.bmp");
-    BMPFile tile2("tile_GBGY.bmp");
-    BMPFile tile3("tile_GBRB.bmp");
-    BMPFile tile4("tile_GBRY.bmp");
-    BMPFile tile5("tile_GYGB.bmp");
-    BMPFile tile6("tile_GYGY.bmp");
-    BMPFile tile7("tile_GYRB.bmp");
-    BMPFile tile8("tile_GYRY.bmp");
-    BMPFile tile9("tile_RYRY.bmp");
-    BMPFile tile10("tile_RBGB.bmp");
-    BMPFile tile11("tile_RYRB.bmp");
-    BMPFile tile12("tile_RBGY.bmp");
-    BMPFile tile13("tile_RBRB.bmp");
-    BMPFile tile14("tile_RBRY.bmp");
-    BMPFile tile15("tile_RYGB.bmp");
-    BMPFile tile16("tile_RYGY.bmp");
-
-    vector<Tile> tileSet;
-
-    tileSet.push_back(Tile(tile1));
-    tileSet.push_back(Tile(tile2));
-    tileSet.push_back(Tile(tile3));
-    tileSet.push_back(Tile(tile4));
-    tileSet.push_back(Tile(tile5));
-    tileSet.push_back(Tile(tile6));
-    tileSet.push_back(Tile(tile7));
-    tileSet.push_back(Tile(tile8));
-    tileSet.push_back(Tile(tile9));
-    tileSet.push_back(Tile(tile10));
-    tileSet.push_back(Tile(tile11));
-    tileSet.push_back(Tile(tile12));
-    tileSet.push_back(Tile(tile13));
-    tileSet.push_back(Tile(tile14));
-    tileSet.push_back(Tile(tile15));
-    tileSet.push_back(Tile(tile16));
-
-    TileMap map(tileSet, 10, 10);
-
-    map.generate();
-    map.print();
-
-    BMPFile::writeFile(map.getPixelWidth(), map.getPixelHeight(), map.makeArray(), "output.bmp");
+    BMPFile::writeFile(quilt.getDimension(), quilt.getDimension(), output->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\imageQuiltIn2NEW.bmp");
 }

@@ -27,12 +27,13 @@ public:
     vector<unsigned char> getPixelValueAt(int, int, bool);
     unsigned char getValueAt(int);
     void setPixelValueAt(int, int, unsigned char, unsigned char, unsigned char, bool);
-    RGBPlane getRegion(int, int, int, int, bool);
+    RGBPlane* getRegion(int, int, int, int, bool);
     void flipRBValues();
     void setDimensions(int, int);
     int getWidth() const;
     int getHeight() const;
     unsigned char* getRawData();
+    RGBPlane* rotate();
 
     virtual ~RGBPlane();
 };

@@ -93,6 +93,8 @@ int Patch::getOverlapScore(Patch* left, Patch* top)
 {
     int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
 
+    m_error->fill(0);
+
     for (int i = 0 ; i < m_dimension ; i++)
     {
         for (int j = 0 ; j < m_dimension ; j++)
@@ -207,9 +209,6 @@ void Patch::calculateLeastCostBoundaries(Patch* left, Patch* top)
             }
         }
     }
-
-//	getBoundaries()->print();
-//    cout << endl;
 }
 
 /**
@@ -220,8 +219,6 @@ void Patch::calculateLeastCostBoundaries(Patch* left, Patch* top)
  */
 void Patch::cutTopBoundary(Patch* top)
 {
-    int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
-
     if (top == nullptr) // No patch above, therefore there is no overlap
     {
         for (int x = 0; x < m_dimension; x++)
@@ -231,60 +228,30 @@ void Patch::cutTopBoundary(Patch* top)
         return;
     }
 
-	// Otherwise we have to calculate the cut through the overlap
+    vector<int*> paths = getHorizontalCut();
+    int* bestPath = paths[0];
 
-	int previousRow = -1; // We keep track as we move in the X direction where (in Y) the previous column was cut at
-	// since we can only go within -1 -> +1 from that for the next cut
+    for (int i = 1; i < paths.size(); i++)
+    {
+        if (paths[i][m_dimension] <= bestPath[m_dimension])
+        {
+            bestPath = paths[i];
+        }
+    }
 
-	for (int x = m_dimension - 1; x >= 0; x--)
-	{
-		if (true) // Haven't determined a starting cut yet
-		{
-			int smallest = m_error->getPixelValueAt(x, 0);
-			int index = 0;
+    for (int i = 0; i < m_dimension; i++)
+    {
+        int row = bestPath[i];
+        m_boundaries->setPixelValueAt(i, row, m_boundaries->getPixelValueAt(i, row) + 1);
 
-			for (int i = 1; i < overlap; i++) // So we have to iterate the entire column to find the smallest error
-			{
-				int error = m_error->getPixelValueAt(x, i);
-
-				if (error < smallest)
-				{
-					smallest = error;
-					index = i;
-				}
-			}
-			previousRow = index;
-			m_boundaries->setPixelValueAt(x, previousRow, m_boundaries->getPixelValueAt(x, previousRow) + 1);
-		}
-		else // Now we can only iterate from -1 to +1 of previousRow
-		{
-			int start = max(0, previousRow - 1);
-			int end = min(overlap, previousRow + 1);
-			int smallest = INT_MAX;
-			int index = 0;
-
-			for (int i = start; i < end; i++)
-			{
-				int error = m_error->getPixelValueAt(x, i);
-
-				if (error < smallest)
-				{
-					smallest = error;
-					index = i;
-				}
-			}
-			previousRow = index;
-			m_boundaries->setPixelValueAt(x, previousRow, m_boundaries->getPixelValueAt(x, previousRow) + 1);
-		}
-
-		if (previousRow != 0)
-		{
-			for (int i = previousRow - 1; i >= 0; i--)
-			{
-				m_boundaries->setPixelValueAt(x, i, 3);
-			}
-		}
-	}
+        if (row != 0)
+        {
+            for (int j = row - 1; j >= 0; j--)
+            {
+                m_boundaries->setPixelValueAt(i, j, 3);
+            }
+        }
+    }
 }
 
 /**
@@ -295,8 +262,6 @@ void Patch::cutTopBoundary(Patch* top)
  */
 void Patch::cutLeftBoundary(Patch* left)
 {
-    int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
-
     if (left == nullptr) // No overlap, only make left column the "cut"
     {
         for (int y = 0; y < m_dimension; y++)
@@ -306,60 +271,30 @@ void Patch::cutLeftBoundary(Patch* left)
         return;
     }
 
-	// Otherwise we have to calculate the least cost cut through the left overlap surface
+    vector<int*> paths = getVerticalCut();
+    int* bestPath = paths[0];
 
-	int previousCol = -1; // We keep track as we move in the Y direction where (in X) the previous column was cut at
-	// since we can only go within -1 -> +1 from that for the next cut
+    for (int i = 1; i < paths.size(); i++)
+    {
+        if (paths[i][m_dimension] <= bestPath[m_dimension])
+        {
+            bestPath = paths[i];
+        }
+    }
 
-	for (int y = m_dimension - 1; y >= 0; y--)
-	{
-		if (true) // Haven't determined starting cut yet
-		{
-			int smallest = m_error->getPixelValueAt(0, y);
-			int index = 0;
+    for (int i = 0; i < m_dimension; i++)
+    {
+        int col = bestPath[i];
+        m_boundaries->setPixelValueAt(col, i, m_boundaries->getPixelValueAt(col, i) + 1);
 
-			for (int i = 1; i < overlap; i++) // So we have to iterate the entire row to find the smallest error
-			{
-				int error = m_error->getPixelValueAt(i, y);
-
-				if (error < smallest)
-				{
-					smallest = error;
-					index = i;
-				}
-			}
-			previousCol = index;
-			m_boundaries->setPixelValueAt(previousCol, y, m_boundaries->getPixelValueAt(previousCol, y) + 1);
-		}
-		else // Now we can only iterate from -1 to +1 of previousCol
-		{
-			int start = max(0, previousCol - 1);
-			int end = min(overlap, previousCol + 1);
-			int smallest = INT_MAX;
-			int index = 0;
-
-			for (int i = start; i < end; i++)
-			{
-				int error = m_error->getPixelValueAt(i, y);
-
-				if (error < smallest)
-				{
-					smallest = error;
-					index = i;
-				}
-			}
-			previousCol = index;
-			m_boundaries->setPixelValueAt(previousCol, y, m_boundaries->getPixelValueAt(previousCol, y) + 1);
-		}
-
-		if (previousCol != 0)
-		{
-			for (int i = previousCol - 1; i >= 0; i--)
-			{
-				m_boundaries->setPixelValueAt(i, y, 3);
-			}
-		}
-	}
+        if (col != 0)
+        {
+            for (int j = col - 1; j >= 0; j--)
+            {
+                m_boundaries->setPixelValueAt(j, i, 3);
+            }
+        }
+    }
 }
 
 /**
@@ -383,4 +318,129 @@ vector<int> Patch::findCorner()
 	}
 
 	return point;
+}
+
+/**
+ * Gets the code this patch represents
+ * @return The code of the patch
+ */
+char Patch::getCode()
+{
+    return m_code;
+}
+
+/**
+ * Function to determine the least cost cut along the vertical overlap surface.
+ *
+ * @return Array structured such that the last index holds the running cumulative cost of the path, and the rest holds
+ *               the indices of each point we have used for this path
+ */
+vector<int*> Patch::getVerticalCut()
+{
+    vector<vector<int*>> paths;
+    int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
+
+    paths.resize(m_dimension);
+
+    for (int i = m_dimension - 1; i >= 0; i--)
+    {
+        vector<int*> row;
+        for (int j = 0; j < overlap; j++) {
+            if (i == m_dimension - 1)
+            {
+                int* pathData = new int[m_dimension + 1];
+
+                pathData[m_dimension] = m_error->getPixelValueAt(j, i);
+                pathData[i] = j;
+
+                row.push_back(pathData);
+            }
+            else
+            {
+                int start = max(0, j - 1);
+                int end = min(overlap - 1, j + 1);
+                int* best = paths[i + 1][start];
+
+                for (int x = start + 1; x <= end; x++)
+                {
+                    int* path = paths[i + 1][x];
+
+                    if (path[m_dimension] <= best[m_dimension])
+                    {
+                        best = path;
+                    }
+                }
+
+                int* newPath = new int[m_dimension + 1];
+
+                copy(best, best + m_dimension + 1, newPath);
+
+                newPath[i] = j;
+                newPath[m_dimension] = newPath[m_dimension] + m_error->getPixelValueAt(j, i);
+
+                row.push_back(newPath);
+            }
+        }
+        paths[i] = row;
+    }
+
+    return paths[0];
+}
+
+/**
+ * Function to determine the least cost cut along the horizontal overlap surface.
+ *
+ * @return Array structured such that the last index holds the running cumulative cost of the path, and the rest holds
+ *               the indices of each point we have used for this path
+ */
+vector<int*> Patch::getHorizontalCut()
+{
+    vector<vector<int*>> paths;
+    int overlap = m_dimension / Quilt::OVERLAP_DIVISOR;
+
+    paths.resize(m_dimension);
+
+    for (int i = m_dimension - 1; i >= 0; i--) // i here is the column
+    {
+        vector<int*> row;
+        for (int j = 0; j < overlap; j++) {
+            if (i == m_dimension - 1)
+            {
+                int* pathData = new int[m_dimension + 1];
+
+                pathData[m_dimension] = m_error->getPixelValueAt(i, j);
+                pathData[i] = j;
+
+                row.push_back(pathData);
+            }
+            else
+            {
+                int start = max(0, j - 1);
+                int end = min(overlap - 1, j + 1);
+                int* best = paths[i + 1][start];
+
+                for (int x = start + 1; x <= end; x++)
+                {
+                    int* path = paths[i + 1][x];
+
+                    if (path[m_dimension] <= best[m_dimension])
+                    {
+                        best = path;
+                    }
+                }
+
+                int* newPath = new int[m_dimension + 1];
+
+                copy(best, best + m_dimension + 1, newPath);
+
+                newPath[i] = j;
+                newPath[m_dimension] = newPath[m_dimension] + m_error->getPixelValueAt(i, j);
+
+                row.push_back(newPath);
+            }
+        }
+        paths[i] = row;
+    }
+
+    return paths[0];
 }

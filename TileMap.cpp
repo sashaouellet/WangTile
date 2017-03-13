@@ -75,10 +75,15 @@ void TileMap::generate()
     {
         cout << "i: " << i << endl;
         vector<Tile> row;
+        Tile* last = nullptr;
 
         for (int j = 0 ; j < m_width ; j++)
         {
-           cout << "\tj: " << j << endl;
+            if (j != 0)
+            {
+                last = &row[j - 1];
+            }
+            cout << "\tj: " << j << endl;
             // Special case for first tile
             if (i == 0 && j == 0)
             {
@@ -90,7 +95,7 @@ void TileMap::generate()
                 Tile t = getRandom();
 
                 // Pick while the codes for the E and W sides don't match
-                while (!t.hasCodeAtSide(row[j - 1].getCodeAtSide(Tile::EAST), Tile::WEST))
+                while (!t.hasCodeAtSide(row[j - 1].getCodeAtSide(Tile::EAST), Tile::WEST) || t.isSame(last))
                 {
                     t = getRandom();
                     cout << "[EAST / WEST]   Need: " << row[j - 1].getCodeAtSide(Tile::EAST) << ", Have: " << t.getCodeAtSide(Tile::WEST) << endl;
@@ -108,7 +113,7 @@ void TileMap::generate()
                 // Special case for first of row, don't need to check E/W
                 if (j == 0)
                 {
-                    while (!t.hasCodeAtSide(m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH), Tile::NORTH))
+                    while (!t.hasCodeAtSide(m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH), Tile::NORTH) || t.isSame(last))
                     {
                         t = getRandom();
                         cout << "[NORTH / SOUTH] Need: " << m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH) << ", Have: " << t.getCodeAtSide(Tile::NORTH) << endl;
@@ -118,7 +123,7 @@ void TileMap::generate()
                 else
                 {
                     int tries = 0;
-                    while ((!t.hasCodeAtSide(row[j - 1].getCodeAtSide(Tile::EAST), Tile::WEST) || !t.hasCodeAtSide(m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH), Tile::NORTH)) && tries < 10)
+                    while ((!t.hasCodeAtSide(row[j - 1].getCodeAtSide(Tile::EAST), Tile::WEST) || !t.hasCodeAtSide(m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH), Tile::NORTH) || t.isSame(last)) && tries < 10)
                     {
                         t = getRandom();
                         cout << "[NORTH / SOUTH] Need: " << m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH) << ", Have: " << t.getCodeAtSide(Tile::NORTH) << endl;
@@ -209,4 +214,15 @@ void TileMap::placeTile(Tile &tile, int x, int y, unsigned char *data)
         int col = i % (tileWidth * 3);
         data[offset + (tileWidth * 3 * (x + (m_width * row))) + col] = imagePixels[i];
     }
+}
+
+/**
+ * Gets the tile at the specified x and y coordinates in the TileMap plane
+ * @param x The x value of the tile
+ * @param y The y value of the tile
+ * @return The tile at these coordinates
+ */
+Tile TileMap::getTileAt(int x, int y)
+{
+    return m_tiles[y][x];
 }

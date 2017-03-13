@@ -87,3 +87,35 @@ BMPFile& Tile::getImage()
 {
     return m_image;
 }
+
+/**
+ * Gets the size of this tile's side length
+ * @return The tile side length
+ */
+int Tile::getDimension()
+{
+    return m_image.getWidth();
+}
+
+/**
+ * Determines if the given Tile is the same as this one
+ * @param other The other tile to compare to
+ * @return True if the other tile has matching side codes, false if not or other is nullptr
+ */
+bool Tile::isSame(Tile* other)
+{
+    if (other == nullptr)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        if (other->getCodeAtSide(i) != getCodeAtSide(i))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
