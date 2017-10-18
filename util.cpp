@@ -6,6 +6,7 @@
  */
 
 #include <stdexcept>
+#include <cmath>
 #include "util.h"
 
 namespace util
@@ -39,5 +40,27 @@ namespace util
         }
 
         return codes;
+    }
+
+    /**
+     * Calculates the l2 norm of the difference between the vectors a and b
+     * @param a Vector 1
+     * @param b Vector 2
+     * @param size Size of the vectors
+     * @return The l2 norm of the difference between the vectors
+     */
+    int l2NormDiff(int* a, int* b, int size)
+    {
+        int sum = 0;
+
+        for (int i = 0; i < size; i++)
+        {
+            sum += (a[i] - b[i]) * (a[i] - b[i]);
+        }
+
+        delete [] a;
+        delete [] b;
+
+        return sqrt(sum);
     }
 }

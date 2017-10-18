@@ -5,6 +5,7 @@
  *
  * @author Sasha Ouellet - spaouellet@me.com
  * @version 1.0 - 02/05/17
+ * @version 1.1 - 02/19/17 - Allowing construction via pre-developed vector array of Tiles
  */
 
 #include <cstdlib>
@@ -18,7 +19,7 @@
  * @param width The width, in number of tiles
  * @param height The height, in number of tiles
  */
-TileMap::TileMap(vector<Tile> tileSet, unsigned int width, unsigned int height)
+TileMap::TileMap(vector<Tile>& tileSet, unsigned int width, unsigned int height)
 {
     m_tileSet = tileSet;
     m_width = width;
@@ -28,12 +29,24 @@ TileMap::TileMap(vector<Tile> tileSet, unsigned int width, unsigned int height)
 }
 
 /**
+ * Constructs the tile map from the already generated tile set, in its grid format
+ * @param tiles
+ */
+TileMap::TileMap(vector<vector<Tile>> &tiles, unsigned int width, unsigned int height)
+{
+    m_tiles = tiles;
+    m_tileSet = tiles[0];
+    m_width = width;
+    m_height = height;
+}
+
+/**
  * Get the pixel width of the entire TileMap
  * @return The pixel width of the map
  */
 int TileMap::getPixelWidth()
 {
-    return m_tileSet[0].getImage()->getWidth() * m_width;
+    return m_tileSet[0].getImage().getWidth() * m_width;
 }
 
 /**
@@ -42,7 +55,7 @@ int TileMap::getPixelWidth()
  */
 int TileMap::getPixelHeight()
 {
-    return m_tileSet[0].getImage()->getHeight() * m_height;
+    return m_tileSet[0].getImage().getHeight() * m_height;
 }
 
 /**
@@ -62,15 +75,19 @@ void TileMap::generate()
     {
         cout << "i: " << i << endl;
         vector<Tile> row;
+        Tile* last = nullptr;
 
         for (int j = 0 ; j < m_width ; j++)
         {
-           cout << "\tj: " << j << endl;
+            if (j != 0)
+            {
+                last = &row[j - 1];
+            }
+            cout << "\tj: " << j << endl;
             // Special case for first tile
             if (i == 0 && j == 0)
             {
-                Tile t = getRandom();
-                row.push_back(t);
+                row.push_back(getRandom());
             }
             // Special case for first row, don't need to check for row above
             else if (i == 0)
@@ -78,7 +95,7 @@ void TileMap::generate()
                 Tile t = getRandom();
 
                 // Pick while the codes for the E and W sides don't match
-                while (!t.hasCodeAtSide(row[j - 1].getCodeAtSide(Tile::EAST), Tile::WEST))
+                while (!t.hasCodeAtSide(row[j - 1].getCodeAtSide(Tile::EAST), Tile::WEST) || t.isSame(last))
                 {
                     t = getRandom();
                     cout << "[EAST / WEST]   Need: " << row[j - 1].getCodeAtSide(Tile::EAST) << ", Have: " << t.getCodeAtSide(Tile::WEST) << endl;
@@ -96,7 +113,7 @@ void TileMap::generate()
                 // Special case for first of row, don't need to check E/W
                 if (j == 0)
                 {
-                    while (!t.hasCodeAtSide(m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH), Tile::NORTH))
+                    while (!t.hasCodeAtSide(m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH), Tile::NORTH) || t.isSame(last))
                     {
                         t = getRandom();
                         cout << "[NORTH / SOUTH] Need: " << m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH) << ", Have: " << t.getCodeAtSide(Tile::NORTH) << endl;
@@ -106,7 +123,7 @@ void TileMap::generate()
                 else
                 {
                     int tries = 0;
-                    while ((!t.hasCodeAtSide(row[j - 1].getCodeAtSide(Tile::EAST), Tile::WEST) || !t.hasCodeAtSide(m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH), Tile::NORTH)) && tries < 10)
+                    while ((!t.hasCodeAtSide(row[j - 1].getCodeAtSide(Tile::EAST), Tile::WEST) || !t.hasCodeAtSide(m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH), Tile::NORTH) || t.isSame(last)) && tries < 10)
                     {
                         t = getRandom();
                         cout << "[NORTH / SOUTH] Need: " << m_tiles[i - 1][j].getCodeAtSide(Tile::SOUTH) << ", Have: " << t.getCodeAtSide(Tile::NORTH) << endl;
@@ -185,10 +202,10 @@ unsigned char* TileMap::makeArray()
 void TileMap::placeTile(Tile &tile, int x, int y, unsigned char *data)
 {
     y = m_height - 1 - y;
-    BMPFile *image = tile.getImage();
-    unsigned char *imagePixels = image->getPixels();
-    int tileWidth = image->getWidth();
-    int size = tileWidth * image->getHeight() * 3;
+    BMPFile& image = tile.getImage();
+    const unsigned char *imagePixels = image.getPlane()->getRawData();
+    int tileWidth = image.getWidth();
+    int size = tileWidth * image.getHeight() * 3;
     int offset = y * m_width * size;
 
     for (int i = 0; i < size; i++)
@@ -197,4 +214,15 @@ void TileMap::placeTile(Tile &tile, int x, int y, unsigned char *data)
         int col = i % (tileWidth * 3);
         data[offset + (tileWidth * 3 * (x + (m_width * row))) + col] = imagePixels[i];
     }
+}
+
+/**
+ * Gets the tile at the specified x and y coordinates in the TileMap plane
+ * @param x The x value of the tile
+ * @param y The y value of the tile
+ * @return The tile at these coordinates
+ */
+Tile TileMap::getTileAt(int x, int y)
+{
+    return m_tiles[y][x];
 }
