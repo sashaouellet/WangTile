@@ -12,15 +12,24 @@ void makeQuiltedImage();
 void makeWangTiles();
 
 int main() {
+<<<<<<< HEAD
 //    makeWangTiles();
     makeQuiltedImage();
+=======
+	makeWangTiles();
+//    makeQuiltedImage();
+>>>>>>> 6a599d761db6c94f29cb834a2274a9e67b1a7369
 
     return 0;
 }
 
 void makeWangTiles()
 {
+<<<<<<< HEAD
 	BMPFile file("D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\input2.bmp");
+=======
+	BMPFile file("/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/grass.bmp");
+>>>>>>> 6a599d761db6c94f29cb834a2274a9e67b1a7369
     int dim = file.getWidth() / 2;
 
 	Patch* red = Quilt::getPatchFromSourceAt(file, dim, 0, 0, dim - 1, dim - 1, Patch::CODE_R);
@@ -60,6 +69,7 @@ void makeWangTiles()
     Quilt q8(file, 2, l8);
     q8.makeSeamsAndQuilt();
 
+<<<<<<< HEAD
     BMPFile::writeFile(q1.getDimension(), q1.getDimension(), q1.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt1.bmp");
     BMPFile::writeFile(q2.getDimension(), q2.getDimension(), q2.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt2.bmp");
     BMPFile::writeFile(q3.getDimension(), q3.getDimension(), q3.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt3.bmp");
@@ -68,6 +78,16 @@ void makeWangTiles()
     BMPFile::writeFile(q6.getDimension(), q6.getDimension(), q6.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt6.bmp");
     BMPFile::writeFile(q7.getDimension(), q7.getDimension(), q7.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt7.bmp");
     BMPFile::writeFile(q8.getDimension(), q8.getDimension(), q8.getOutput()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\quilt8.bmp");
+=======
+    BMPFile::writeFile(q1.getDimension(), q1.getDimension(), q1.getOutput()->getRawData(), "quilt1.bmp");
+    BMPFile::writeFile(q2.getDimension(), q2.getDimension(), q2.getOutput()->getRawData(), "quilt2.bmp");
+    BMPFile::writeFile(q3.getDimension(), q3.getDimension(), q3.getOutput()->getRawData(), "quilt3.bmp");
+    BMPFile::writeFile(q4.getDimension(), q4.getDimension(), q4.getOutput()->getRawData(), "quilt4.bmp");
+    BMPFile::writeFile(q5.getDimension(), q5.getDimension(), q5.getOutput()->getRawData(), "quilt5.bmp");
+    BMPFile::writeFile(q6.getDimension(), q6.getDimension(), q6.getOutput()->getRawData(), "quilt6.bmp");
+    BMPFile::writeFile(q7.getDimension(), q7.getDimension(), q7.getOutput()->getRawData(), "quilt7.bmp");
+    BMPFile::writeFile(q8.getDimension(), q8.getDimension(), q8.getOutput()->getRawData(), "quilt8.bmp");
+>>>>>>> 6a599d761db6c94f29cb834a2274a9e67b1a7369
 
     Tile* t1 = q1.getTile();
     Tile* t2 = q2.getTile();
@@ -78,6 +98,7 @@ void makeWangTiles()
     Tile* t7 = q7.getTile();
     Tile* t8 = q8.getTile();
 
+<<<<<<< HEAD
     BMPFile::writeFile(t1->getDimension(), t1->getDimension(), t1->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile1.bmp");
     BMPFile::writeFile(t2->getDimension(), t2->getDimension(), t2->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile2.bmp");
     BMPFile::writeFile(t3->getDimension(), t3->getDimension(), t3->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile3.bmp");
@@ -86,6 +107,16 @@ void makeWangTiles()
     BMPFile::writeFile(t6->getDimension(), t6->getDimension(), t6->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile6.bmp");
     BMPFile::writeFile(t7->getDimension(), t7->getDimension(), t7->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile7.bmp");
     BMPFile::writeFile(t8->getDimension(), t8->getDimension(), t8->getImage().getPlane()->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\tile8.bmp");
+=======
+    BMPFile::writeFile(t1->getDimension(), t1->getDimension(), t1->getImage().getPlane()->getRawData(), "tile1.bmp");
+    BMPFile::writeFile(t2->getDimension(), t2->getDimension(), t2->getImage().getPlane()->getRawData(), "tile2.bmp");
+    BMPFile::writeFile(t3->getDimension(), t3->getDimension(), t3->getImage().getPlane()->getRawData(), "tile3.bmp");
+    BMPFile::writeFile(t4->getDimension(), t4->getDimension(), t4->getImage().getPlane()->getRawData(), "tile4.bmp");
+    BMPFile::writeFile(t5->getDimension(), t5->getDimension(), t5->getImage().getPlane()->getRawData(), "tile5.bmp");
+    BMPFile::writeFile(t6->getDimension(), t6->getDimension(), t6->getImage().getPlane()->getRawData(), "tile6.bmp");
+    BMPFile::writeFile(t7->getDimension(), t7->getDimension(), t7->getImage().getPlane()->getRawData(), "tile7.bmp");
+    BMPFile::writeFile(t8->getDimension(), t8->getDimension(), t8->getImage().getPlane()->getRawData(), "tile8.bmp");
+>>>>>>> 6a599d761db6c94f29cb834a2274a9e67b1a7369
 
     vector<Tile> tiles = {*t1, *t2, *t3, *t4, *t5, *t6, *t7, *t8};
 
@@ -94,18 +125,32 @@ void makeWangTiles()
     map.generate();
     map.print();
 
+<<<<<<< HEAD
     BMPFile::writeFile(map.getPixelWidth(), map.getPixelHeight(), map.makeArray(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\patchTileMapTEST5.bmp");
+=======
+    BMPFile::writeFile(map.getPixelWidth(), map.getPixelHeight(), map.makeArray(), "/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/grassTile.bmp");
+>>>>>>> 6a599d761db6c94f29cb834a2274a9e67b1a7369
 }
 
 void makeQuiltedImage()
 {
+<<<<<<< HEAD
 	BMPFile file("D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\grass.bmp");
 //	BMPFile file("/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/input2.bmp");
 	Quilt quilt(file, 30, 32);
+=======
+//	BMPFile file("D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\grass.bmp");
+	BMPFile file("/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/grass.bmp");
+	Quilt quilt(file, 8, 32);
+>>>>>>> 6a599d761db6c94f29cb834a2274a9e67b1a7369
 
 	quilt.generate();
 
 	RGBPlane* output = quilt.makeSeamsAndQuilt();
 
+<<<<<<< HEAD
     BMPFile::writeFile(quilt.getDimension(), quilt.getDimension(), output->getRawData(), "D:\\Users\\spaouellet\\Documents\\Coding\\VSFX375\\WangTile\\imageQuiltIn2NEW.bmp");
+=======
+    BMPFile::writeFile(quilt.getDimension(), quilt.getDimension(), output->getRawData(), "/Volumes/Macintosh MD/Users/spaouellet/Documents/code/CLion/WangTile/bricksQuilt.bmp");
+>>>>>>> 6a599d761db6c94f29cb834a2274a9e67b1a7369
 }
